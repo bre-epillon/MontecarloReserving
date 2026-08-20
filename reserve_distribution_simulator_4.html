@@ -1,0 +1,1501 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Reserve Distribution Simulator — ENUPS</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans:wght@400;500;600;700&family=IBM+Plex+Sans+Condensed:wght@600;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --paper:#E7EAE6;
+  --panel:#FFFFFF;
+  --panel-alt:#F4F6F3;
+  --ink:#13181B;
+  --muted:#5D686D;
+  --faint:#8B959A;
+  --rule:#CDD4D1;
+  --rule-strong:#A8B2AF;
+  --teal:#12606E;
+  --teal-deep:#0B3A44;
+  --teal-wash:#DCE9EA;
+  --crimson:#A4302B;
+  --crimson-wash:#F3E0DE;
+  --amber:#B0790C;
+  --focus:#12606E;
+  --mono:"IBM Plex Mono",ui-monospace,Menlo,Consolas,monospace;
+  --sans:"IBM Plex Sans",-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;
+  --cond:"IBM Plex Sans Condensed","IBM Plex Sans",-apple-system,sans-serif;
+}
+*{box-sizing:border-box}
+html,body{margin:0;padding:0}
+body{
+  background:var(--paper);
+  color:var(--ink);
+  font-family:var(--sans);
+  font-size:14px;
+  line-height:1.45;
+  -webkit-font-smoothing:antialiased;
+}
+.wrap{max-width:1280px;margin:0 auto;padding:0 20px 80px}
+
+/* ---------- header ---------- */
+header.masthead{
+  border-bottom:1px solid var(--rule-strong);
+  background:var(--paper);
+  position:sticky;top:0;z-index:40;
+}
+.masthead-inner{max-width:1280px;margin:0 auto;padding:16px 20px 0;display:flex;flex-wrap:wrap;gap:16px;align-items:flex-start;justify-content:space-between}
+.brand h1{
+  font-family:var(--cond);font-weight:700;font-size:23px;letter-spacing:-.01em;margin:0;
+}
+.brand p{margin:2px 0 0;color:var(--muted);font-size:12px;font-family:var(--mono);letter-spacing:.02em}
+.headline-strip{display:flex;gap:22px;align-items:baseline;flex-wrap:wrap}
+.hs-item{display:flex;flex-direction:column;gap:1px}
+.hs-item .k{font-family:var(--mono);font-size:9.5px;letter-spacing:.09em;text-transform:uppercase;color:var(--faint)}
+.hs-item .v{font-family:var(--mono);font-size:15px;font-weight:600;font-variant-numeric:tabular-nums}
+.hs-item .v.stat{color:var(--crimson)}
+.hs-item .v.mbe{color:var(--teal)}
+
+nav.tabs{display:flex;gap:0;margin-top:14px;max-width:1280px;margin-left:auto;margin-right:auto;padding:0 20px}
+nav.tabs button{
+  appearance:none;background:none;border:none;border-bottom:2px solid transparent;
+  font-family:var(--cond);font-weight:600;font-size:14px;letter-spacing:.02em;
+  color:var(--muted);padding:9px 16px 9px 0;margin-right:20px;cursor:pointer;
+}
+nav.tabs button .num{font-family:var(--mono);font-size:10px;color:var(--faint);margin-right:6px;font-weight:500}
+nav.tabs button:hover{color:var(--ink)}
+nav.tabs button[aria-selected="true"]{color:var(--ink);border-bottom-color:var(--crimson)}
+nav.tabs button:focus-visible{outline:2px solid var(--focus);outline-offset:2px}
+
+/* ---------- run bar ---------- */
+.runbar{
+  display:flex;align-items:center;gap:14px;flex-wrap:wrap;
+  padding:12px 0;border-bottom:1px solid var(--rule);margin-bottom:22px;
+}
+button.run{
+  appearance:none;border:1px solid var(--teal-deep);background:var(--teal-deep);color:#fff;
+  font-family:var(--cond);font-weight:700;font-size:14px;letter-spacing:.03em;text-transform:uppercase;
+  padding:9px 20px;border-radius:2px;cursor:pointer;
+}
+button.run:hover{background:var(--teal)}
+button.run:disabled{opacity:.45;cursor:default}
+button.ghost{
+  appearance:none;border:1px solid var(--rule-strong);background:transparent;color:var(--ink);
+  font-family:var(--sans);font-size:12.5px;padding:7px 13px;border-radius:2px;cursor:pointer;
+}
+button.ghost:hover{border-color:var(--ink);background:var(--panel)}
+button:focus-visible{outline:2px solid var(--focus);outline-offset:2px}
+.status{font-family:var(--mono);font-size:11.5px;color:var(--muted)}
+.status.stale{color:var(--crimson)}
+.progress{height:3px;background:var(--rule);width:170px;border-radius:2px;overflow:hidden;display:none}
+.progress.on{display:block}
+.progress i{display:block;height:100%;background:var(--teal);width:0%}
+
+/* ---------- panels ---------- */
+.panel{background:var(--panel);border:1px solid var(--rule);border-radius:3px;margin-bottom:22px}
+.panel > h2{
+  margin:0;padding:11px 16px;border-bottom:1px solid var(--rule);
+  font-family:var(--cond);font-weight:700;font-size:13px;letter-spacing:.06em;text-transform:uppercase;
+  display:flex;align-items:baseline;gap:10px;
+}
+.panel > h2 .tag{font-family:var(--mono);font-size:10px;letter-spacing:.04em;color:var(--crimson);text-transform:none;font-weight:500}
+.panel > h2 .note{font-family:var(--sans);font-size:11.5px;letter-spacing:0;text-transform:none;color:var(--muted);font-weight:400;margin-left:auto}
+.panel .body{padding:14px 16px}
+.panel .body.flush{padding:0}
+
+/* ---------- tables ---------- */
+.tablescroll{overflow-x:auto}
+table{border-collapse:collapse;width:100%;font-variant-numeric:tabular-nums}
+th,td{text-align:right;padding:0;border-bottom:1px solid var(--rule);white-space:nowrap}
+thead th{
+  font-family:var(--mono);font-size:9.5px;font-weight:500;letter-spacing:.05em;text-transform:uppercase;
+  color:var(--muted);padding:8px 10px;vertical-align:bottom;border-bottom:1px solid var(--rule-strong);
+  background:var(--panel-alt);
+}
+thead th.lbl{text-align:left}
+tbody td{font-family:var(--mono);font-size:12.5px;padding:0 10px;height:30px}
+tbody td.lbl{text-align:left;font-family:var(--sans);font-size:12.5px;color:var(--ink);font-weight:500;padding:0 10px}
+tbody tr:hover td{background:#FAFBFA}
+tbody tr.total td{font-weight:600;border-top:1px solid var(--rule-strong);border-bottom:none;background:var(--panel-alt)}
+tbody tr.total:hover td{background:var(--panel-alt)}
+td.calc{color:var(--muted)}
+td.zero{color:var(--faint)}
+input.cell{
+  width:100%;border:none;background:#F0F5F6;text-align:right;
+  font-family:var(--mono);font-size:12.5px;color:#0B3A44;padding:5px 7px;border-radius:2px;
+  font-variant-numeric:tabular-nums;
+}
+input.cell:hover{background:#E4EEF0}
+input.cell:focus{outline:2px solid var(--focus);outline-offset:-2px;background:#fff}
+input.cell.wide{min-width:120px}
+td.editable{padding:2px 6px}
+.rowdel{
+  appearance:none;border:none;background:none;color:var(--faint);cursor:pointer;
+  font-family:var(--mono);font-size:14px;line-height:1;padding:2px 6px;
+}
+.rowdel:hover{color:var(--crimson)}
+.notecopy{max-width:80ch;font-size:14.5px;line-height:1.72;color:var(--ink)}
+.notecopy p{margin:0 0 1.05em}
+.notecopy p:last-child{margin-bottom:0}
+.notecopy b{font-weight:600;font-family:var(--mono);font-size:13.5px;letter-spacing:-.01em}
+.stalebanner{border-left:2px solid var(--crimson);background:var(--crimson-wash);padding:8px 12px;
+  margin-bottom:16px;font-size:12.5px;color:var(--ink);max-width:80ch}
+.field input[type=text]{font-family:var(--sans)}
+.legend{
+  display:flex;gap:18px;flex-wrap:wrap;padding:10px 16px;border-top:1px solid var(--rule);
+  font-size:11.5px;color:var(--muted);align-items:center;
+}
+.swatch{display:inline-block;width:11px;height:11px;border-radius:2px;background:#F0F5F6;border:1px solid #D3E0E2;vertical-align:-1px;margin-right:5px}
+
+/* ---------- settings grid ---------- */
+.settings{display:grid;grid-template-columns:repeat(auto-fit,minmax(184px,1fr));gap:16px 20px}
+.field label{display:block;font-family:var(--mono);font-size:9.5px;letter-spacing:.07em;text-transform:uppercase;color:var(--muted);margin-bottom:4px}
+.field input[type=number],.field input[type=text],.field select{
+  width:100%;border:1px solid var(--rule-strong);background:#F0F5F6;border-radius:2px;
+  font-family:var(--mono);font-size:13px;padding:7px 8px;color:#0B3A44;
+}
+.field select{background:#F0F5F6}
+.field input:focus,.field select:focus{outline:2px solid var(--focus);outline-offset:-1px;background:#fff}
+.field .hint{font-size:11px;color:var(--faint);margin-top:4px;line-height:1.35}
+.field .hint label.check{display:flex;gap:6px;align-items:center;font-family:var(--sans);font-size:11px;
+  letter-spacing:0;text-transform:none;color:var(--muted);margin:0 0 2px}
+.field .hint input[type=checkbox]{accent-color:var(--teal);width:13px;height:13px;margin:0}
+
+/* ---------- distribution / signature ---------- */
+.verdict{
+  background:var(--panel);border:1px solid var(--rule);border-radius:3px;
+  padding:26px 26px 20px;margin-bottom:22px;
+}
+.verdict .eyebrow{font-family:var(--mono);font-size:10px;letter-spacing:.11em;text-transform:uppercase;color:var(--muted)}
+.verdict .big{
+  font-family:var(--cond);font-weight:700;font-size:clamp(46px,9vw,82px);line-height:.94;
+  letter-spacing:-.02em;color:var(--crimson);margin:8px 0 2px;font-variant-numeric:tabular-nums;
+}
+.verdict .big small{font-size:.36em;font-weight:600;letter-spacing:0;margin-left:2px}
+.verdict .sub{font-size:13.5px;color:var(--muted);max-width:62ch}
+.verdict .sub b{color:var(--ink);font-weight:600}
+
+/* percentile ruler — signature element */
+.ruler{margin:26px 0 6px;position:relative;height:56px}
+.ruler .track{position:absolute;top:22px;left:0;right:0;height:10px;background:linear-gradient(90deg,#E3E8E6 0%,#D6E2E3 55%,#EBDCDA 84%,#E7CFCC 100%);border:1px solid var(--rule-strong);border-radius:1px}
+.ruler .tick{position:absolute;top:22px;width:1px;height:10px;background:var(--rule-strong)}
+.ruler .ticklab{position:absolute;top:36px;transform:translateX(-50%);font-family:var(--mono);font-size:9.5px;color:var(--faint)}
+.ruler .needle{position:absolute;top:12px;width:2px;height:30px;background:var(--crimson);transition:left .5s cubic-bezier(.2,.7,.2,1)}
+.ruler .needlelab{
+  position:absolute;top:-4px;transform:translateX(-50%);font-family:var(--mono);font-size:10.5px;
+  font-weight:600;color:var(--crimson);white-space:nowrap;transition:left .5s cubic-bezier(.2,.7,.2,1);
+}
+.ruler .mbe{position:absolute;top:18px;width:2px;height:18px;background:var(--teal);opacity:.75;transition:left .5s cubic-bezier(.2,.7,.2,1)}
+.ruler .mbelab{position:absolute;top:36px;transform:translateX(-50%);font-family:var(--mono);font-size:9.5px;color:var(--teal);white-space:nowrap;transition:left .5s cubic-bezier(.2,.7,.2,1)}
+
+.chartwrap{position:relative;width:100%;height:340px}
+canvas{width:100%;height:100%;display:block}
+.chartlegend{display:flex;gap:20px;flex-wrap:wrap;padding:10px 16px 0;font-size:11.5px;color:var(--muted)}
+.chartlegend i{display:inline-block;width:16px;height:2px;vertical-align:3px;margin-right:6px}
+
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:22px}
+@media(max-width:880px){.grid2{grid-template-columns:1fr}}
+
+.kv{display:grid;grid-template-columns:1fr auto;gap:0}
+.kv > div{padding:7px 16px;border-bottom:1px solid var(--rule);font-size:12.5px}
+.kv > div:nth-child(odd){color:var(--muted)}
+.kv > div:nth-child(even){font-family:var(--mono);font-variant-numeric:tabular-nums;text-align:right}
+.kv > div:nth-last-child(-n+2){border-bottom:none}
+
+.pill{display:inline-block;font-family:var(--mono);font-size:10px;letter-spacing:.05em;text-transform:uppercase;padding:2px 7px;border:1px solid var(--rule-strong);border-radius:99px;color:var(--muted)}
+.empty{padding:40px 16px;text-align:center;color:var(--muted);font-size:13px}
+.empty b{display:block;font-family:var(--cond);font-size:17px;color:var(--ink);margin-bottom:6px;font-weight:700}
+[hidden]{display:none !important}
+.foot{font-size:11.5px;color:var(--faint);line-height:1.6;max-width:88ch;margin-top:8px}
+@media (prefers-reduced-motion:reduce){*{transition:none !important}}
+</style>
+</head>
+<body>
+
+<header class="masthead">
+  <div class="masthead-inner">
+    <div class="brand">
+      <h1>Reserve Distribution Simulator</h1>
+      <p id="brandline">ENUPS · Monte Carlo on earned reserves</p>
+    </div>
+    <div class="headline-strip">
+      <div class="hs-item"><span class="k">Earned MBE reserves</span><span class="v mbe" id="hs-mbe">—</span></div>
+      <div class="hs-item"><span class="k">Earned statutory reserves</span><span class="v stat" id="hs-stat">—</span></div>
+      <div class="hs-item"><span class="k">Statutory percentile</span><span class="v stat" id="hs-pct">—</span></div>
+    </div>
+  </div>
+  <nav class="tabs" role="tablist">
+    <button role="tab" id="tab-inputs" aria-selected="true" aria-controls="p-inputs"><span class="num">01</span>Inputs</button>
+    <button role="tab" id="tab-output" aria-selected="false" aria-controls="p-output"><span class="num">02</span>Output</button>
+    <button role="tab" id="tab-dist" aria-selected="false" aria-controls="p-dist"><span class="num">03</span>Distribution</button>
+    <button role="tab" id="tab-note" aria-selected="false" aria-controls="p-note"><span class="num">04</span>Reporting note</button>
+  </nav>
+</header>
+
+<div class="wrap">
+
+  <div class="runbar">
+    <button class="run" id="btn-run">Run simulation</button>
+    <div class="progress" id="prog"><i></i></div>
+    <span class="status" id="status">Ready.</span>
+    <span style="margin-left:auto"></span>
+    <button class="ghost" id="btn-export-json">Save inputs</button>
+    <button class="ghost" id="btn-import-json">Load inputs</button>
+    <button class="ghost" id="btn-reset">Reset to file</button>
+    <input type="file" id="file-json" accept="application/json" hidden>
+  </div>
+
+  <!-- ============ TAB 1 : INPUTS ============ -->
+  <section id="p-inputs" role="tabpanel" aria-labelledby="tab-inputs">
+
+    <div class="panel">
+      <h2>Input 1 — Ultimates <span class="tag">gross · statutory as at 06/2026</span>
+        <span class="note">Blue cells are yours to edit. Grey columns are calculated.</span></h2>
+      <div class="body flush tablescroll">
+        <table id="t-ult">
+          <thead>
+            <tr>
+              <th class="lbl">UWY</th>
+              <th>Premium ultimate</th>
+              <th>Case reserves</th>
+              <th>Total incurred claims</th>
+              <th>SIBNR</th>
+              <th>IBNR MBE</th>
+              <th>IBNR stat</th>
+              <th>Total res. MBE</th>
+              <th>GULR MBE</th>
+              <th>Total res. stat</th>
+              <th>GULR stat</th>
+              <th></th>
+            </tr>
+          </thead>
+          <tbody id="tb-ult"></tbody>
+        </table>
+      </div>
+      <div class="legend">
+        <span><span class="swatch"></span>Editable input</span>
+        <span style="color:var(--faint)">Total res. = case + SIBNR + IBNR · GULR = (incurred + SIBNR + IBNR) / premium</span>
+        <button class="ghost" id="btn-addrow" style="margin-left:auto">Add underwriting year</button>
+      </div>
+    </div>
+
+    <div class="grid2">
+      <div class="panel">
+        <h2>Input 2 — Variability</h2>
+        <div class="body">
+          <div class="settings">
+            <div class="field">
+              <label for="in-mean">Mean loss ratio</label>
+              <input type="text" inputmode="decimal" id="in-mean">
+              <div class="hint">Portfolio GULR MBE the coefficient of variation is measured against.</div>
+            </div>
+            <div class="field">
+              <label for="in-sd">Standard deviation</label>
+              <input type="text" inputmode="decimal" id="in-sd">
+              <div class="hint">Absolute, on the same loss-ratio scale as the mean.</div>
+            </div>
+            <div class="field">
+              <label>Coefficient of variation</label>
+              <input type="text" id="out-cov" disabled>
+              <div class="hint">SD ÷ mean. Every year's SD is its own mean × this ratio.</div>
+            </div>
+          </div>
+          <div style="margin-top:14px">
+            <button class="ghost" id="btn-syncmean">Set mean from Input 1 total GULR MBE</button>
+            <span class="hint" id="syncnote" style="margin-left:8px;color:var(--faint);font-size:11px"></span>
+          </div>
+        </div>
+      </div>
+
+      <div class="panel">
+        <h2>Input 3 — Earned percentage</h2>
+        <div class="body flush tablescroll">
+          <table id="t-earned">
+            <thead><tr><th class="lbl">UWY</th><th>Earned %</th><th>Unearned %</th></tr></thead>
+            <tbody id="tb-earned"></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <div class="panel">
+      <h2>Simulation settings</h2>
+      <div class="body">
+        <div class="settings">
+          <div class="field">
+            <label for="in-dist">Loss ratio distribution</label>
+            <select id="in-dist">
+              <option value="lognormal">Lognormal</option>
+              <option value="gamma">Gamma</option>
+              <option value="pareto">Pareto (Type I)</option>
+            </select>
+            <div class="hint" id="dist-hint"></div>
+          </div>
+          <div class="field">
+            <label for="in-floor">Std deviation floor</label>
+            <input type="number" id="in-floor" step="1">
+            <div class="hint">Per cent applied to the base. −100 removes the floor; −90 would hold each draw at 10% of it.</div>
+          </div>
+          <div class="field">
+            <label for="in-ceil">Std deviation ceiling</label>
+            <input type="number" id="in-ceil" step="1">
+            <div class="hint">Per cent applied to the base. 1000 caps each draw at 11× it; 100 would cap at 2×.</div>
+          </div>
+          <div class="field">
+            <label for="in-clipbase">Cap base</label>
+            <select id="in-clipbase">
+              <option value="sd">Std deviation (as in the file)</option>
+              <option value="mean">Mean loss ratio</option>
+              <option value="none">No cap</option>
+            </select>
+            <div class="hint">Each simulated loss ratio is held inside the floor–ceiling band.</div>
+          </div>
+          <div class="field">
+            <label for="in-iter">Iterations</label>
+            <input type="text" inputmode="numeric" id="in-iter">
+            <div class="hint">100,000 by default. Above 250,000 the scenario view on the Output tab switches off.</div>
+          </div>
+          <div class="field">
+            <label for="in-seed">Random seed</label>
+            <input type="number" id="in-seed" step="1">
+            <div class="hint"><label class="check"><input type="checkbox" id="in-lockseed"> Keep this seed on every run</label>
+              Unlocked, each run draws a fresh seed. Lock it to reproduce a run exactly.</div>
+          </div>
+          <div class="field">
+            <label for="in-rho">Correlation between years</label>
+            <input type="number" id="in-rho" step="0.05" min="0" max="0.99">
+            <div class="hint">0 keeps years independent, as the file does. Above 0 the years move together.</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </section>
+
+  <!-- ============ TAB 2 : OUTPUT ============ -->
+  <section id="p-output" role="tabpanel" aria-labelledby="tab-output" hidden>
+    <div class="panel">
+      <h2>Output
+        <span class="note" id="scenarionote">Column <b>Simulated IBNR MBE GULR</b> shows the scenario selected below.</span>
+      </h2>
+      <div class="body" style="border-bottom:1px solid var(--rule)">
+        <div class="settings" style="grid-template-columns:repeat(auto-fit,minmax(210px,1fr))">
+          <div class="field">
+            <label for="in-scenario">Scenario shown</label>
+            <select id="in-scenario">
+              <option value="mean">Deterministic — each year at its mean loss ratio</option>
+              <option value="stat">Iteration nearest the statutory reserve</option>
+              <option value="median">Iteration nearest the median total</option>
+              <option value="custom">Iteration at a chosen percentile</option>
+            </select>
+          </div>
+          <div class="field" id="fld-scenpct" hidden>
+            <label for="in-scenpct">Percentile</label>
+            <input type="number" id="in-scenpct" min="0.1" max="99.9" step="0.1" value="75">
+          </div>
+        </div>
+      </div>
+      <div class="body flush tablescroll">
+        <table id="t-out">
+          <thead>
+            <tr>
+              <th class="lbl">UWY</th>
+              <th>Earned MBE reserves</th>
+              <th>IBNR GULR MBE</th>
+              <th>Earned stat reserves</th>
+              <th>IBNR GULR stat</th>
+              <th>Std deviation</th>
+              <th>SD floor</th>
+              <th>SD ceiling</th>
+              <th>Simulated IBNR MBE GULR</th>
+              <th>Ultimate IBNR MBE simulated</th>
+              <th>Total ultimate res. MBE sim.</th>
+              <th>Total earned res. MBE sim.</th>
+            </tr>
+          </thead>
+          <tbody id="tb-out"></tbody>
+        </table>
+      </div>
+      <div class="legend">
+        <span style="color:var(--faint)">Earned reserves = case + SIBNR + IBNR × earned %. Simulated ultimate IBNR = premium ultimate × simulated GULR.</span>
+      </div>
+    </div>
+    <p class="foot" id="outfoot"></p>
+  </section>
+
+  <!-- ============ TAB 3 : DISTRIBUTION ============ -->
+  <section id="p-dist" role="tabpanel" aria-labelledby="tab-dist" hidden>
+
+    <div class="verdict" id="verdict">
+      <div class="empty" id="dist-empty">
+        <b>No distribution yet</b>
+        Run the simulation to place your statutory reserve on the curve.
+      </div>
+      <div id="verdict-body" hidden>
+        <div class="eyebrow">Earned statutory reserves sit at the</div>
+        <div class="big" id="v-pct">—<small>th percentile</small></div>
+        <div class="sub" id="v-sub"></div>
+        <div class="ruler" id="ruler">
+          <div class="track"></div>
+          <div class="mbe" id="r-mbe"></div>
+          <div class="mbelab" id="r-mbelab">MBE</div>
+          <div class="needle" id="r-needle"></div>
+          <div class="needlelab" id="r-needlelab">Statutory</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="panel" id="chartpanel" hidden>
+      <h2>Simulated total earned reserves <span class="note" id="chartnote"></span></h2>
+      <div class="body">
+        <div class="chartwrap"><canvas id="cv"></canvas></div>
+      </div>
+      <div class="chartlegend">
+        <span><i style="background:var(--teal-wash);height:10px;border:1px solid var(--rule-strong)"></i>Frequency of simulated totals</span>
+        <span><i style="background:var(--teal-deep)"></i>Cumulative probability</span>
+        <span><i style="background:var(--crimson)"></i>Earned statutory reserves</span>
+        <span><i style="background:var(--amber)"></i>Earned MBE reserves</span>
+      </div>
+    </div>
+
+    <div class="grid2" id="statsgrid" hidden>
+      <div class="panel">
+        <h2>Distribution statistics</h2>
+        <div class="kv" id="kv-stats"></div>
+      </div>
+      <div class="panel">
+        <h2>Percentiles</h2>
+        <div class="body flush tablescroll">
+          <table id="t-pct">
+            <thead><tr><th class="lbl">Percentile</th><th>Total earned reserves</th><th>vs statutory</th></tr></thead>
+            <tbody id="tb-pct"></tbody>
+          </table>
+        </div>
+        <div class="legend">
+          <button class="ghost" id="btn-csv-sum">Export summary (CSV)</button>
+          <button class="ghost" id="btn-csv-draws">Export simulated totals (CSV)</button>
+        </div>
+      </div>
+    </div>
+
+    <p class="foot" id="distfoot"></p>
+  </section>
+
+  <!-- ============ TAB 4 : REPORTING NOTE ============ -->
+  <section id="p-note" role="tabpanel" aria-labelledby="tab-note" hidden>
+    <div class="panel">
+      <h2>Reporting note <span class="tag">ready to paste</span>
+        <span class="note">Written from the current settings and the last completed run.</span></h2>
+      <div class="body" style="border-bottom:1px solid var(--rule)">
+        <div class="settings" style="grid-template-columns:repeat(auto-fit,minmax(200px,1fr))">
+          <div class="field">
+            <label for="in-book">Portfolio described</label>
+            <input type="text" id="in-book">
+          </div>
+          <div class="field">
+            <label for="in-valdate">Valuation date</label>
+            <input type="text" id="in-valdate">
+          </div>
+          <div class="field">
+            <label for="in-currency">Currency label</label>
+            <input type="text" id="in-currency">
+            <div class="hint">Appears before each amount, e.g. EUR 80,232,611.</div>
+          </div>
+        </div>
+      </div>
+      <div class="body">
+        <div id="note-stale" class="stalebanner" hidden></div>
+        <div class="notecopy" id="notebody"></div>
+      </div>
+      <div class="legend">
+        <button class="ghost" id="btn-copy-note">Copy note</button>
+        <button class="ghost" id="btn-dl-note">Download as text</button>
+        <span id="copynote" style="color:var(--faint)">Plain text — paste into Word, Outlook or the ORSA template.</span>
+      </div>
+    </div>
+  </section>
+
+</div>
+
+<script>
+"use strict";
+
+/* ============================================================
+   DEFAULT DATA — from new_MC.xlsx, sheet ENUPS
+   ============================================================ */
+const DEFAULTS = {
+  rows: [
+    {uwy:"<=2019", premium:57871717.239999995, caseRes:283922.00166099466, incurred:18387363.978740264, sibnr:0,        ibnrMbe:8065.258626045923,   ibnrStat:9752.690773461014,  earned:1},
+    {uwy:"2020",   premium:29757692.529999994, caseRes:163407.4145259219,  incurred:1735608.3913557418, sibnr:1235000,  ibnrMbe:43372.96950058751,   ibnrStat:52447.56294608908,  earned:0.9993856243072301},
+    {uwy:"2021",   premium:30837894.769999996, caseRes:1013052.4493230828, incurred:17106091.568375863, sibnr:0,        ibnrMbe:67089.71700152333,   ibnrStat:81126.38345928863,  earned:1},
+    {uwy:"2022",   premium:24534757.476926316, caseRes:556347.0874790383,  incurred:1423093.2469154084, sibnr:0,        ibnrMbe:3871960.599560135,   ibnrStat:4682061.191762676,  earned:0.9996312495591274},
+    {uwy:"2023",   premium:22696899.707364652, caseRes:5484099.4422977045, incurred:30451978.719811585, sibnr:0,        ibnrMbe:2705704.6381968632,  ibnrStat:3271798.448649753,  earned:0.9992435932058479},
+    {uwy:"2024",   premium:31596640.992098548, caseRes:1882530.6336029898, incurred:2189925.5398650398, sibnr:0,        ibnrMbe:8868898.807369452,   ibnrStat:10765383.899057582, earned:0.9987362795878776},
+    {uwy:"2025",   premium:23398456.644641306, caseRes:1009565.5292341976, incurred:1094000.3520194276, sibnr:35000000, ibnrMbe:11404866.636602417,  ibnrStat:13998218.859851874, earned:0.9125555386152493},
+    {uwy:"2026",   premium:21346503.22697309,  caseRes:1,                  incurred:1,                  sibnr:0,        ibnrMbe:11740575.774835201,  ibnrStat:14574065.803231632, earned:0.13625579343150188}
+  ],
+  varMean: 0.6087144882800639,
+  varSd:   0.587214652940763,
+  floorPct: -100,
+  ceilPct: 1000,
+  clipBase: "sd",
+  dist: "lognormal",
+  iterations: 100000,
+  seed: 20260630,
+  lockSeed: false,
+  rho: 0,
+  book: "ENUPS",
+  valDate: "30 June 2026",
+  currency: "EUR"
+};
+const DIST_LABEL = {lognormal:"Lognormal", gamma:"Gamma", pareto:"Pareto (Type I)"};
+
+let S = structuredClone(DEFAULTS);
+let RESULT = null;          // simulation output
+let STALE  = true;
+
+/* ============================================================
+   FORMATTING
+   ============================================================ */
+const fMoney = n => (n===null||n===undefined||!isFinite(n)) ? "—" :
+  (Math.abs(n) < 0.5 ? "-" : n.toLocaleString("en-US",{maximumFractionDigits:0}));
+const fMio = n => (n/1e6).toLocaleString("en-US",{minimumFractionDigits:1,maximumFractionDigits:1}) + "m";
+const fPct = (n,d=2) => (n===null||n===undefined||!isFinite(n)) ? "—" : (n*100).toLocaleString("en-US",{minimumFractionDigits:d,maximumFractionDigits:d}) + "%";
+const fMoneyIn = n => (!isFinite(n)) ? "" : n.toLocaleString("en-US",{maximumFractionDigits:0});
+const fPctIn = (n,d=2) => (!isFinite(n)) ? "" : (n*100).toLocaleString("en-US",{minimumFractionDigits:d,maximumFractionDigits:d}) + "%";
+const raw = n => (!isFinite(n)) ? "" : String(+(+n).toFixed(6));
+function parseNum(str){
+  const v = parseFloat(String(str).replace(/[^0-9.eE+\-]/g,""));
+  return isFinite(v) ? v : null;
+}
+const fNum = (n,d=4) => (n===null||n===undefined||!isFinite(n)) ? "—" : n.toLocaleString("en-US",{minimumFractionDigits:d,maximumFractionDigits:d});
+
+/* ============================================================
+   DERIVED MODEL  (mirrors the workbook, cell for cell)
+   ============================================================ */
+function derive(){
+  const cov = S.varMean ? S.varSd / S.varMean : 0;
+  const rows = S.rows.map(r => {
+    const totalMbe  = r.caseRes + r.sibnr + r.ibnrMbe;
+    const totalStat = r.caseRes + r.sibnr + r.ibnrStat;
+    const gulrMbe   = r.premium ? (r.incurred + r.sibnr + r.ibnrMbe)  / r.premium : 0;
+    const gulrStat  = r.premium ? (r.incurred + r.sibnr + r.ibnrStat) / r.premium : 0;
+    const meanLr    = r.premium ? r.ibnrMbe  / r.premium : 0;      // col C
+    const statLr    = r.premium ? r.ibnrStat / r.premium : 0;      // col E
+    const sd        = meanLr * cov;                                 // col F
+    const base      = S.clipBase === "mean" ? meanLr : sd;
+    const floor     = base * (1 + S.floorPct/100);                  // col G
+    const ceil      = base * (1 + S.ceilPct/100);                   // col H
+    const earnedMbe = r.caseRes + r.sibnr + r.ibnrMbe  * r.earned;  // col B
+    const earnedSt  = r.caseRes + r.sibnr + r.ibnrStat * r.earned;  // col D
+    return {...r, totalMbe, totalStat, gulrMbe, gulrStat, meanLr, statLr, sd, floor, ceil,
+            earnedMbe, earnedSt, simulate: meanLr > 0 && r.premium > 0};
+  });
+  const T = k => rows.reduce((a,r)=>a+r[k],0);
+  const totals = {
+    premium:T("premium"), caseRes:T("caseRes"), incurred:T("incurred"), sibnr:T("sibnr"),
+    ibnrMbe:T("ibnrMbe"), ibnrStat:T("ibnrStat"), totalMbe:T("totalMbe"), totalStat:T("totalStat"),
+    earnedMbe:T("earnedMbe"), earnedSt:T("earnedSt")
+  };
+  totals.gulrMbe  = totals.premium ? (totals.incurred + totals.sibnr + totals.ibnrMbe)  / totals.premium : 0;
+  totals.gulrStat = totals.premium ? (totals.incurred + totals.sibnr + totals.ibnrStat) / totals.premium : 0;
+  totals.meanLr   = totals.premium ? totals.ibnrMbe  / totals.premium : 0;
+  totals.statLr   = totals.premium ? totals.ibnrStat / totals.premium : 0;
+  return {rows, totals, cov};
+}
+
+/* ============================================================
+   DISTRIBUTIONS — all fitted by moments to the same mean and SD,
+   so switching only changes the shape of the tail
+   ============================================================ */
+function erfc(x){                                   // Numerical Recipes, ~1.2e-7
+  const z = Math.abs(x), t = 1/(1+z/2);
+  const a = t*Math.exp(-z*z-1.26551223+t*(1.00002368+t*(0.37409196+t*(0.09678418+
+            t*(-0.18628806+t*(0.27886807+t*(-1.13520398+t*(1.48851587+
+            t*(-0.82215223+t*0.17087277)))))))));
+  return x >= 0 ? a : 2-a;
+}
+const normCdf = z => 0.5*erfc(-z/Math.SQRT2);
+function normInv(p){                                // Acklam
+  if (p <= 0) return -8; if (p >= 1) return 8;
+  const a=[-3.969683028665376e+01,2.209460984245205e+02,-2.759285104469687e+02,1.383577518672690e+02,-3.066479806614716e+01,2.506628277459239e+00];
+  const b=[-5.447609879822406e+01,1.615858368580409e+02,-1.556989798598866e+02,6.680131188771972e+01,-1.328068155288572e+01];
+  const c=[-7.784894002430293e-03,-3.223964580411365e-01,-2.400758277161838e+00,-2.549732539343734e+00,4.374664141464968e+00,2.938163982698783e+00];
+  const d=[7.784695709041462e-03,3.224671290700398e-01,2.445134137142996e+00,3.754408661907416e+00];
+  const pl = 0.02425;
+  let q, r;
+  if (p < pl){ q = Math.sqrt(-2*Math.log(p));
+    return (((((c[0]*q+c[1])*q+c[2])*q+c[3])*q+c[4])*q+c[5]) / ((((d[0]*q+d[1])*q+d[2])*q+d[3])*q+1); }
+  if (p > 1-pl){ q = Math.sqrt(-2*Math.log(1-p));
+    return -(((((c[0]*q+c[1])*q+c[2])*q+c[3])*q+c[4])*q+c[5]) / ((((d[0]*q+d[1])*q+d[2])*q+d[3])*q+1); }
+  q = p-0.5; r = q*q;
+  return (((((a[0]*r+a[1])*r+a[2])*r+a[3])*r+a[4])*r+a[5])*q / (((((b[0]*r+b[1])*r+b[2])*r+b[3])*r+b[4])*r+1);
+}
+function lnGamma(x){                                // Lanczos
+  const g=[676.5203681218851,-1259.1392167224028,771.32342877765313,-176.61502916214059,
+           12.507343278686905,-0.13857109526572012,9.9843695780195716e-6,1.5056327351493116e-7];
+  if (x < 0.5) return Math.log(Math.PI/Math.sin(Math.PI*x)) - lnGamma(1-x);
+  x -= 1; let a = 0.99999999999980993; const t = x+7.5;
+  for (let i=0;i<8;i++) a += g[i]/(x+i+1);
+  return 0.5*Math.log(2*Math.PI) + (x+0.5)*Math.log(t) - t + Math.log(a);
+}
+function gammaP(k,x){                               // regularised lower incomplete gamma
+  if (x <= 0) return 0;
+  const lead = Math.exp(-x + k*Math.log(x) - lnGamma(k));
+  if (x < k+1){
+    let sum = 1/k, term = sum, n = k;
+    for (let i=0;i<400;i++){ n++; term *= x/n; sum += term; if (Math.abs(term) < Math.abs(sum)*1e-15) break; }
+    return sum*lead;
+  }
+  let b = x+1-k, c = 1e300, d = 1/b, h = d;
+  for (let i=1;i<400;i++){
+    const an = -i*(i-k); b += 2;
+    d = an*d + b; if (Math.abs(d) < 1e-300) d = 1e-300;
+    c = b + an/c;   if (Math.abs(c) < 1e-300) c = 1e-300;
+    d = 1/d; const del = d*c; h *= del;
+    if (Math.abs(del-1) < 1e-15) break;
+  }
+  return 1 - lead*h;
+}
+function gammaQuantile(k,p){
+  const z = normInv(p);
+  let x = k*Math.pow(1 - 1/(9*k) + z/(3*Math.sqrt(k)), 3);
+  if (!(x > 0)) x = 1e-8;
+  for (let i=0;i<60;i++){
+    const err = gammaP(k,x) - p;
+    const pdf = Math.exp((k-1)*Math.log(x) - x - lnGamma(k));
+    if (!(pdf > 1e-300)) break;
+    let stp = err/pdf;
+    if (stp >  x*0.5) stp =  x*0.5;
+    if (stp < -x*2)   stp = -x*2;
+    x -= stp;
+    if (x <= 0) x = 1e-10;
+    if (Math.abs(stp) < 1e-13*Math.max(1,x)) break;
+  }
+  return x;
+}
+/* Standardised draw: mean 1, standard deviation = the coefficient of variation.
+   Every year is this shape scaled to its own mean, and every draw is driven by a
+   standard normal so the correlation setting works the same way for all three. */
+function stdSampler(cov, dist){
+  if (!(cov > 0)) return z => 1;
+  if (dist === "pareto"){
+    const a = 1 + Math.sqrt(1 + 1/(cov*cov)), xm = (a-1)/a;
+    return z => xm / Math.pow(Math.max(1e-14, normCdf(-z)), 1/a);
+  }
+  if (dist === "gamma"){
+    const k = 1/(cov*cov), theta = 1/k;
+    const Z0 = -6, Z1 = 6, M = 2401, h = (Z1-Z0)/(M-1);
+    const tab = new Float64Array(M);
+    for (let i=0;i<M;i++){
+      const pz = Math.min(1-1e-12, Math.max(1e-12, normCdf(Z0 + i*h)));
+      tab[i] = gammaQuantile(k, pz)*theta;
+    }
+    return z => {
+      if (z <= Z0) return tab[0];
+      if (z >= Z1) return tab[M-1];
+      const t = (z-Z0)/h, i = t|0;
+      return tab[i] + (tab[i+1]-tab[i])*(t-i);
+    };
+  }
+  const sigma = Math.sqrt(Math.log(1+cov*cov)), mu = -sigma*sigma/2;
+  return z => Math.exp(mu + sigma*z);
+}
+function distInfo(cov, dist){
+  if (!(cov > 0)) return "Standard deviation is zero — every year runs at its mean.";
+  if (dist === "pareto"){
+    const a = 1 + Math.sqrt(1 + 1/(cov*cov));
+    return "α = " + a.toFixed(3) + ". Heaviest tail of the three, but values cannot fall below " +
+           ((a-1)/a*100).toFixed(0) + "% of a year's mean.";
+  }
+  if (dist === "gamma"){
+    return "Shape k = " + (1/(cov*cov)).toFixed(3) + ". Lighter right tail than lognormal, more mass in the middle.";
+  }
+  return "σ = " + Math.sqrt(Math.log(1+cov*cov)).toFixed(4) + " on the log scale. The workbook's assumption.";
+}
+
+/* ============================================================
+   RANDOM NUMBERS — seeded, reproducible
+   ============================================================ */
+function mulberry32(a){
+  return function(){
+    a |= 0; a = a + 0x6D2B79F5 | 0;
+    let t = Math.imul(a ^ a >>> 15, 1 | a);
+    t = t + Math.imul(t ^ t >>> 7, 61 | t) ^ t;
+    return ((t ^ t >>> 14) >>> 0) / 4294967296;
+  };
+}
+function makeNormal(rand){
+  let spare = null;
+  return function(){
+    if (spare !== null){ const s = spare; spare = null; return s; }
+    let u, v, s2;
+    do { u = rand()*2-1; v = rand()*2-1; s2 = u*u + v*v; } while (s2 >= 1 || s2 === 0);
+    const m = Math.sqrt(-2*Math.log(s2)/s2);
+    spare = v*m; return u*m;
+  };
+}
+
+/* ============================================================
+   SIMULATION
+   ============================================================ */
+function simulate(onProgress, done){
+  const M = derive();
+  const N = Math.max(1000, Math.min(1000000, Math.round(S.iterations)));
+  const act = M.rows.filter(r => r.simulate);
+  const R = act.length;
+
+  // one shape for the whole book (every year's SD is its own mean x the CoV),
+  // scaled to each year's mean loss ratio
+  const drawStd = stdSampler(M.cov, S.dist);
+  const par = act.map(r => ({
+    mean:r.meanLr, premium:r.premium, earned:r.earned,
+    base:r.caseRes + r.sibnr, floor:r.floor, ceil:r.ceil
+  }));
+  // years that are not simulated still carry case + SIBNR
+  const fixed = M.rows.filter(r=>!r.simulate).reduce((a,r)=>a + r.caseRes + r.sibnr, 0);
+
+  const clip = S.clipBase !== "none";
+  const rho  = Math.max(0, Math.min(0.99, S.rho||0));
+  const wC = Math.sqrt(rho), wI = Math.sqrt(1-rho);
+
+  const totals = new Float64Array(N);
+  const keepDraws = N * R <= 2200000;
+  const draws = keepDraws ? new Float64Array(N*R) : null;
+
+  const rand = mulberry32(Math.round(S.seed) || 1);
+  const nrm = makeNormal(rand);
+
+  let i = 0;
+  const CHUNK = 5000;
+  function step(){
+    const end = Math.min(N, i + CHUNK);
+    for (; i < end; i++){
+      const zc = rho > 0 ? nrm() : 0;
+      let t = fixed;
+      for (let j = 0; j < R; j++){
+        const p = par[j];
+        const z = rho > 0 ? (wC*zc + wI*nrm()) : nrm();
+        let lr = p.mean * drawStd(z);
+        if (clip){ if (lr < p.floor) lr = p.floor; else if (lr > p.ceil) lr = p.ceil; }
+        if (keepDraws) draws[i*R + j] = lr;
+        t += lr * p.premium * p.earned + p.base;
+      }
+      totals[i] = t;
+    }
+    if (i < N){ onProgress(i/N); setTimeout(step, 0); }
+    else {
+      const sorted = Float64Array.from(totals).sort();
+      done({N, R, act, par, totals, sorted, draws, keepDraws, model:M, dist:S.dist});
+    }
+  }
+  step();
+}
+
+function pctOf(sorted, x){                 // share of draws at or below x, in per cent
+  let lo = 0, hi = sorted.length;
+  while (lo < hi){ const m = (lo+hi) >> 1; if (sorted[m] <= x) lo = m+1; else hi = m; }
+  return lo / sorted.length * 100;
+}
+function quantile(sorted, p){              // p in per cent
+  if (!sorted.length) return NaN;
+  const idx = (p/100) * (sorted.length - 1);
+  const lo = Math.floor(idx), hi = Math.ceil(idx);
+  return lo === hi ? sorted[lo] : sorted[lo] + (idx-lo)*(sorted[hi]-sorted[lo]);
+}
+function nearestIteration(res, target){
+  let best = 0, bd = Infinity;
+  for (let i = 0; i < res.N; i++){ const d = Math.abs(res.totals[i]-target); if (d < bd){ bd = d; best = i; } }
+  return best;
+}
+
+/* ============================================================
+   RENDER — inputs
+   ============================================================ */
+const $ = id => document.getElementById(id);
+
+function numCell(value, path, idx, opts={}){
+  const td = document.createElement("td");
+  td.className = "editable";
+  const inp = document.createElement("input");
+  inp.type = "text"; inp.inputMode = "decimal";
+  inp.className = "cell" + (opts.wide ? " wide" : "");
+  const show = () => { const v = S.rows[idx][path];
+    inp.value = opts.pct ? fPctIn(v,2) : fMoneyIn(v); };
+  show();
+  inp.addEventListener("focus", () => {
+    const v = S.rows[idx][path];
+    inp.value = opts.pct ? raw(v*100) : raw(v);
+    inp.select();
+  });
+  inp.addEventListener("input", () => {
+    const v = parseNum(inp.value);
+    if (v === null) return;
+    S.rows[idx][path] = opts.pct ? v/100 : v;
+    markStale(); renderAll();
+  });
+  inp.addEventListener("blur", show);
+  inp.addEventListener("keydown", e => { if (e.key === "Enter") inp.blur(); });
+  td.appendChild(inp);
+  return td;
+}
+function txtCell(value, cls){
+  const td = document.createElement("td");
+  td.className = cls || "";
+  td.textContent = value;
+  return td;
+}
+
+const UI = {ult:[], ultTot:[], earned:[]};
+
+/* structure is built once; edits update calculated cells in place so the
+   cell you are typing in never gets torn out from under the cursor */
+function buildTables(){
+  const tbU = $("tb-ult"); tbU.innerHTML = ""; UI.ult = [];
+  const tbE = $("tb-earned"); tbE.innerHTML = ""; UI.earned = [];
+
+  S.rows.forEach((r,i) => {
+    const tr = document.createElement("tr");
+    const lab = document.createElement("td"); lab.className = "lbl editable";
+    const li = document.createElement("input");
+    li.className = "cell"; li.type = "text"; li.value = r.uwy; li.style.textAlign = "left";
+    lab.appendChild(li); tr.appendChild(lab);
+    tr.appendChild(numCell(r.premium,  "premium",  i, {wide:true}));
+    tr.appendChild(numCell(r.caseRes,  "caseRes",  i, {wide:true}));
+    tr.appendChild(numCell(r.incurred, "incurred", i, {wide:true}));
+    tr.appendChild(numCell(r.sibnr,    "sibnr",    i, {wide:true}));
+    tr.appendChild(numCell(r.ibnrMbe,  "ibnrMbe",  i, {wide:true}));
+    tr.appendChild(numCell(r.ibnrStat, "ibnrStat", i, {wide:true}));
+    const calc = {};
+    ["totalMbe","gulrMbe","totalStat","gulrStat"].forEach(k => {
+      const td = txtCell("", "calc"); calc[k] = td; tr.appendChild(td);
+    });
+    const del = document.createElement("td");
+    if (S.rows.length > 1){
+      const b = document.createElement("button");
+      b.className = "rowdel"; b.textContent = "×"; b.title = "Remove " + r.uwy;
+      b.addEventListener("click", () => { S.rows.splice(i,1); markStale(); buildTables(); renderAll(); });
+      del.appendChild(b);
+    }
+    tr.appendChild(del);
+    tbU.appendChild(tr);
+
+    const tre = document.createElement("tr");
+    const elab = txtCell(r.uwy, "lbl"); tre.appendChild(elab);
+    tre.appendChild(numCell(r.earned, "earned", i, {pct:true, step:0.0001}));
+    const un = txtCell("", "calc"); tre.appendChild(un);
+    tbE.appendChild(tre);
+
+    li.addEventListener("input", () => { S.rows[i].uwy = li.value; elab.textContent = li.value; markStale(); renderAll(); });
+    UI.ult.push(calc);
+    UI.earned.push({unearned:un});
+  });
+
+  const tr = document.createElement("tr"); tr.className = "total";
+  UI.ultTot = [];
+  tr.appendChild(txtCell("Total","lbl"));
+  for (let k=0;k<10;k++){ const td = txtCell(""); UI.ultTot.push(td); tr.appendChild(td); }
+  tr.appendChild(txtCell(""));
+  tbU.appendChild(tr);
+}
+
+function updateInputCalcs(M){
+  M.rows.forEach((d,i) => {
+    const c = UI.ult[i]; if (!c) return;
+    c.totalMbe.textContent  = fMoney(d.totalMbe);
+    c.gulrMbe.textContent   = fPct(d.gulrMbe,1);
+    c.totalStat.textContent = fMoney(d.totalStat);
+    c.gulrStat.textContent  = fPct(d.gulrStat,1);
+    if (UI.earned[i]) UI.earned[i].unearned.textContent = fPct(1-d.earned,2);
+  });
+  const t = M.totals;
+  const vals = [fMoney(t.premium), fMoney(t.caseRes), fMoney(t.incurred), fMoney(t.sibnr),
+                fMoney(t.ibnrMbe), fMoney(t.ibnrStat), fMoney(t.totalMbe), fPct(t.gulrMbe,1),
+                fMoney(t.totalStat), fPct(t.gulrStat,1)];
+  UI.ultTot.forEach((td,k) => td.textContent = vals[k]);
+}
+
+function renderSettings(M){
+  const set = (id,v) => { const e = $(id); if (document.activeElement !== e) e.value = v; };
+  set("in-mean", fPctIn(S.varMean,2));
+  set("in-sd",   fPctIn(S.varSd,2));
+  $("out-cov").value = M.cov.toFixed(2);
+  set("in-floor", S.floorPct);
+  set("in-ceil",  S.ceilPct);
+  set("in-iter",  Math.round(S.iterations).toLocaleString("en-US"));
+  set("in-seed",  S.seed);
+  set("in-rho",   S.rho);
+  $("in-clipbase").value = S.clipBase;
+  $("in-dist").value = S.dist;
+  $("in-lockseed").checked = !!S.lockSeed;
+  $("dist-hint").textContent = distInfo(M.cov, S.dist);
+  const diff = Math.abs(S.varMean - M.totals.gulrMbe);
+  $("syncnote").textContent = diff < 1e-9 ? "Currently in line with Input 1."
+    : "Input 1 total GULR MBE is " + fPct(M.totals.gulrMbe,2) + ".";
+}
+
+/* ============================================================
+   RENDER — output grid
+   ============================================================ */
+function scenarioLrs(M){
+  const mode = $("in-scenario").value;
+  if (mode === "mean" || !RESULT) return {lrs:null, label:"each year at its mean loss ratio", iter:null};
+  let target, label;
+  if (mode === "stat"){ target = M.totals.earnedSt; label = "iteration nearest the statutory reserve"; }
+  else if (mode === "median"){ target = quantile(RESULT.sorted, 50); label = "iteration nearest the median total"; }
+  else { const p = Math.max(0.1, Math.min(99.9, parseFloat($("in-scenpct").value)||50));
+         target = quantile(RESULT.sorted, p); label = "iteration at the " + p + ordSafe(p) + " percentile"; }
+  if (!RESULT.keepDraws) return {lrs:null, label:"deterministic — scenario view off above 250,000 iterations", iter:null};
+  const it = nearestIteration(RESULT, target);
+  const R = RESULT.R;
+  const map = new Map();
+  RESULT.act.forEach((r,j) => map.set(r.uwy, RESULT.draws[it*R + j]));
+  return {lrs:map, label, iter:it};
+}
+const ordSafe = p => {
+  if (!isFinite(p)) return "th";
+  if (Math.abs(p - Math.round(p)) > 1e-9) return "th";   // 60.5 reads "60.5th"
+  const r = Math.round(p), s = ["th","st","nd","rd"], v = r%100;
+  return s[(v-20)%10] || s[v] || s[0];
+};
+
+function renderOutput(){
+  const M = derive();
+  const sc = scenarioLrs(M);
+  const tb = $("tb-out"); tb.innerHTML = "";
+  let sumJ = 0, sumK = 0, sumL = 0;
+  M.rows.forEach(r => {
+    const lr = !r.simulate ? 0 : (sc.lrs ? (sc.lrs.get(r.uwy) ?? r.meanLr) : r.meanLr);
+    const J = r.premium * lr;
+    const K = J + r.caseRes + r.sibnr;
+    const L = J * r.earned + r.caseRes + r.sibnr;
+    sumJ += J; sumK += K; sumL += L;
+    const tr = document.createElement("tr");
+    tr.appendChild(txtCell(r.uwy, "lbl"));
+    tr.appendChild(txtCell(fMoney(r.earnedMbe)));
+    tr.appendChild(txtCell(fPct(r.meanLr,2), "calc"));
+    tr.appendChild(txtCell(fMoney(r.earnedSt)));
+    tr.appendChild(txtCell(fPct(r.statLr,2), "calc"));
+    tr.appendChild(txtCell(r.simulate ? fPct(r.sd,2) : "—", "calc"));
+    tr.appendChild(txtCell(r.simulate ? fPct(r.floor,2) : "—", "calc"));
+    tr.appendChild(txtCell(r.simulate ? fPct(r.ceil,2) : "—", "calc"));
+    const cI = txtCell(r.simulate ? fPct(lr,2) : "not simulated", r.simulate ? "" : "zero");
+    if (r.simulate) cI.style.color = "var(--teal)";
+    tr.appendChild(cI);
+    tr.appendChild(txtCell(fMoney(J)));
+    tr.appendChild(txtCell(fMoney(K)));
+    tr.appendChild(txtCell(fMoney(L)));
+    tb.appendChild(tr);
+  });
+  const t = M.totals;
+  const tr = document.createElement("tr"); tr.className = "total";
+  [["Total","lbl"],[fMoney(t.earnedMbe)],[fPct(t.meanLr,2)],[fMoney(t.earnedSt)],[fPct(t.statLr,2)],
+   ["—"],["—"],["—"],["—"],[fMoney(sumJ)],[fMoney(sumK)],[fMoney(sumL)]].forEach(([v,c]) => tr.appendChild(txtCell(v,c)));
+  tb.appendChild(tr);
+
+  $("scenarionote").innerHTML = "Simulated GULR column shows the <b>" + sc.label + "</b>.";
+  $("outfoot").textContent = sc.iter === null
+    ? "Total earned reserves MBE at mean loss ratios: " + fMoney(sumL) + ". This is the centre of the distribution before the floor and ceiling bite."
+    : "Iteration #" + (sc.iter+1) + " of " + RESULT.N.toLocaleString("en-US") + " — total earned reserves MBE simulated " + fMoney(sumL) + ".";
+}
+
+/* ============================================================
+   RENDER — distribution
+   ============================================================ */
+function renderDistribution(){
+  const M = derive();
+  if (!RESULT){ $("dist-empty").hidden = false; $("verdict-body").hidden = true;
+    $("chartpanel").hidden = true; $("statsgrid").hidden = true; return; }
+  $("dist-empty").hidden = true; $("verdict-body").hidden = false;
+  $("chartpanel").hidden = false; $("statsgrid").hidden = false;
+
+  const s = RESULT.sorted, N = RESULT.N;
+  const stat = M.totals.earnedSt, mbe = M.totals.earnedMbe;
+  const pStat = pctOf(s, stat), pMbe = pctOf(s, mbe);
+  let mean = 0; for (let i=0;i<N;i++) mean += RESULT.totals[i]; mean /= N;
+  let v = 0; for (let i=0;i<N;i++){ const d = RESULT.totals[i]-mean; v += d*d; } v /= (N-1);
+  const sd = Math.sqrt(v);
+
+  $("v-pct").innerHTML = pStat.toFixed(1) + "<small>" + ordSafe(pStat) + " percentile</small>";
+  const surplus = stat - quantile(s,50);
+  $("v-sub").innerHTML =
+    "<b>" + fMoney(stat) + "</b> of earned statutory reserves against a simulated median of <b>" + fMoney(quantile(s,50)) +
+    "</b>. That is " + (surplus>=0 ? "a margin of <b>" + fMoney(surplus) + "</b> above" : "a shortfall of <b>" + fMoney(-surplus) + "</b> below") +
+    " the median outcome, and it is exceeded in " + (100-pStat).toFixed(1) + "% of the " + N.toLocaleString("en-US") + " simulated outcomes.";
+
+  const pos = p => Math.max(0, Math.min(100, p));
+  $("r-needle").style.left = pos(pStat) + "%";
+  $("r-needlelab").style.left = pos(pStat) + "%";
+  $("r-needlelab").textContent = "Statutory · " + pStat.toFixed(1) + ordSafe(pStat);
+  $("r-mbe").style.left = pos(pMbe) + "%";
+  $("r-mbelab").style.left = pos(pMbe) + "%";
+  $("r-mbelab").textContent = "MBE · " + pMbe.toFixed(1) + ordSafe(pMbe);
+  buildTicks();
+
+  $("hs-pct").textContent = pStat.toFixed(1) + ordSafe(pStat);
+  $("chartnote").textContent = DIST_LABEL[RESULT.dist] + " · " + N.toLocaleString("en-US") + " iterations · seed " + S.seed +
+    (S.rho>0 ? " · correlation " + S.rho : "") +
+    (S.clipBase==="none" ? " · no cap" : " · cap " + S.floorPct + "% / +" + S.ceilPct + "% on " + (S.clipBase==="sd"?"SD":"mean"));
+
+  const kv = $("kv-stats"); kv.innerHTML = "";
+  const rows = [
+    ["Iterations", N.toLocaleString("en-US")],
+    ["Simulated years", RESULT.R + " of " + M.rows.length],
+    ["Mean", fMoney(mean)],
+    ["Standard deviation", fMoney(sd)],
+    ["Coefficient of variation", fPct(sd/mean,1)],
+    ["Minimum", fMoney(s[0])],
+    ["Maximum", fMoney(s[N-1])],
+    ["Earned MBE reserves (book)", fMoney(mbe)],
+    ["— its percentile", pMbe.toFixed(1) + ordSafe(pMbe)],
+    ["Earned statutory reserves (book)", fMoney(stat)],
+    ["— its percentile", pStat.toFixed(1) + ordSafe(pStat)],
+    ["Statutory margin over MBE", fMoney(stat-mbe)]
+  ];
+  rows.forEach(([k,val]) => {
+    const a = document.createElement("div"); a.textContent = k;
+    const b = document.createElement("div"); b.textContent = val;
+    kv.appendChild(a); kv.appendChild(b);
+  });
+
+  const tb = $("tb-pct"); tb.innerHTML = "";
+  [1,5,10,25,50,75,90,95,99,99.5].forEach(p => {
+    const q = quantile(s,p);
+    const tr = document.createElement("tr");
+    tr.appendChild(txtCell(p + ordSafe(p), "lbl"));
+    tr.appendChild(txtCell(fMoney(q)));
+    const diff = stat - q;
+    const c = txtCell((diff>=0?"+":"−") + fMoney(Math.abs(diff)));
+    c.style.color = diff >= 0 ? "var(--teal)" : "var(--crimson)";
+    tr.appendChild(c);
+    tb.appendChild(tr);
+  });
+
+  drawChart(s, stat, mbe);
+  $("distfoot").textContent =
+    "Each iteration draws one loss ratio per underwriting year from a " + DIST_LABEL[RESULT.dist].toLowerCase() +
+    " fitted by moments to that year's mean IBNR loss ratio and its scaled standard deviation, " +
+    "converts it to an ultimate IBNR on the premium ultimate, earns it, and adds case reserves and SIBNR. The total across years is one point of the distribution above.";
+}
+
+const esc = t => String(t).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;");
+
+/* The note is generated from the live settings and the last completed run, so it
+   can never drift out of line with the numbers it describes. */
+function noteParagraphs(){
+  const M = derive();
+  const cur = S.currency ? S.currency.trim() + " " : "";
+  const A = n => "<b>" + cur + fMoney(n) + "</b>";
+  const V = t => "<b>" + t + "</b>";
+  const sim = M.rows.filter(r => r.simulate).length;
+  const nYears = M.rows.length;
+  const ran = !!RESULT;
+  const s = ran ? RESULT.sorted : null;
+  const pStat = ran ? pctOf(s, M.totals.earnedSt) : null;
+  const med = ran ? quantile(s, 50) : null;
+  let simMean = null;
+  if (ran){ simMean = 0; for (let i=0;i<RESULT.N;i++) simMean += RESULT.totals[i]; simMean /= RESULT.N; }
+  const dist = DIST_LABEL[ran ? RESULT.dist : S.dist].toLowerCase().replace(" (type i)"," (Type I)");
+  const floorX = 1 + S.floorPct/100, ceilX = 1 + S.ceilPct/100;
+  const capBase = S.clipBase === "mean" ? "mean loss ratio" : "standard deviation";
+
+  // --- caps ---
+  let caps;
+  if (S.clipBase === "none"){
+    caps = " No bounds are imposed on the simulated loss ratios, so the full tail of the fitted distribution is retained.";
+  } else if (floorX <= 0){
+    caps = " Simulated loss ratios are capped above at " + V(ceilX.toFixed(2) + "\u00d7") + " each year's " + capBase +
+           " and are not bounded below; at that width the cap removes only numerically extreme draws and leaves the fitted tail substantially intact.";
+  } else {
+    caps = " Simulated loss ratios are constrained to lie between " + V(floorX.toFixed(2) + "\u00d7") + " and " +
+           V(ceilX.toFixed(2) + "\u00d7") + " each year's " + capBase + ", which truncates the extreme tail of the fitted distribution" +
+           (ceilX < 3 ? " and, being a material constraint, holds the simulated mean below the deterministic best estimate." : ".");
+  }
+  const dep = S.rho > 0
+    ? " Underwriting years are linked through a common shock calibrated to a correlation of " + V(S.rho) +
+      ", so adverse development tends to affect several years at once."
+    : " Underwriting years are drawn independently of one another, consistent with the absence of an identified common driver of development across years.";
+
+  const p1 =
+    "The adequacy of the reserves carried on the " + esc(S.book) + " book as at " + esc(S.valDate) +
+    " has been assessed stochastically rather than against a single point estimate. The IBNR loss ratio of each underwriting year is treated as a random variable centred on the actuarial best estimate, with a standard deviation equal to that year's mean multiplied by the portfolio coefficient of variation of " +
+    V(M.cov.toFixed(2)) + " (a standard deviation of " + V(fPctIn(S.varSd,2)) + " against a mean loss ratio of " +
+    V(fPctIn(S.varMean,2)) + "). Each year's loss ratio is drawn from a " + dist +
+    " distribution fitted by the method of moments, so that the fitted mean and standard deviation reproduce those parameters exactly." +
+    caps + dep;
+
+  const p2 =
+    "In each iteration the simulated loss ratio of an underwriting year is applied to that year's ultimate premium to give a simulated ultimate IBNR, which is earned at the year's earned percentage and added to case reserves and SIBNR to give the reserve requirement of that year. The requirements of the " +
+    V(nYears) + " underwriting years are then summed to give the total earned reserve requirement, one observation of the distribution, and the exercise is repeated " +
+    V((ran ? RESULT.N : Math.round(S.iterations)).toLocaleString("en-US")) + " times" +
+    (sim < nYears ? ". Years carrying no best-estimate IBNR are not simulated and contribute their case reserves and SIBNR only" : "") +
+    ". Premium ultimates, case reserves and SIBNR are held fixed throughout, so the variability presented is that of the IBNR component alone." +
+    (!ran ? ""
+      : Math.abs(simMean - M.totals.earnedMbe) / M.totals.earnedMbe > 0.01
+        ? (" The mean of the simulated distribution is " + A(simMean) + " against a deterministic best estimate of " +
+           A(M.totals.earnedMbe) + "; the shortfall is the arithmetic effect of the cap described above, which truncates the upper tail of each year's loss ratio and so pulls the simulated average below the best estimate.")
+        : (" As a control on the calibration, the mean of the simulated distribution is " + A(simMean) +
+           " against a deterministic best estimate of " + A(M.totals.earnedMbe) +
+           ", confirming that the simulation is centred on the best estimate without material bias."));
+
+  let p3 = "";
+  if (ran){
+    const gap = M.totals.earnedSt - med;
+    p3 =
+      "The earned statutory reserves of " + A(M.totals.earnedSt) + " carried at the valuation date sit at the " +
+      V(pStat.toFixed(1) + ordSafe(pStat) + " percentile") + " of the simulated distribution, against a simulated median requirement of " +
+      A(med) + ". The booked position is therefore sufficient to meet the simulated requirement in approximately " +
+      V(pStat.toFixed(0) + "%") + " of outcomes and " +
+      (gap >= 0 ? "carries a margin of " + A(gap) + " over the median outcome"
+                : "falls short of the median outcome by " + A(-gap)) +
+      ", the earned best estimate of " + A(M.totals.earnedMbe) + " sitting at the " +
+      V(pctOf(s, M.totals.earnedMbe).toFixed(1) + ordSafe(pctOf(s, M.totals.earnedMbe)) + " percentile") +
+      " on the same basis. Three limitations should be borne in mind when reading this result: parameter uncertainty in the coefficient of variation is not itself modelled, the volatility assumption is applied uniformly across underwriting years rather than differentiated by maturity, and all figures are presented gross of retrocession.";
+  }
+  return [p1, p2, p3].filter(Boolean);
+}
+
+function renderNote(){
+  const box = $("notebody");
+  const ps = noteParagraphs();
+  box.innerHTML = ps.map(t => "<p>" + t + "</p>").join("");
+  const banner = $("note-stale");
+  if (!RESULT){
+    banner.hidden = false;
+    banner.textContent = "The note is complete once the simulation has been run — the result paragraph is added then.";
+  } else if (STALE){
+    banner.hidden = false;
+    banner.textContent = "Inputs have changed since the last run. The figures below still describe that earlier run; rerun the simulation before circulating the note.";
+  } else {
+    banner.hidden = true;
+  }
+  const set = (id,v) => { const e = $(id); if (document.activeElement !== e) e.value = v; };
+  set("in-book", S.book); set("in-valdate", S.valDate); set("in-currency", S.currency);
+}
+function noteText(){
+  return noteParagraphs().map(t => t.replace(/<[^>]+>/g,"")
+    .replace(/&lt;/g,"<").replace(/&gt;/g,">").replace(/&amp;/g,"&")).join("\n\n");
+}
+
+function buildTicks(){
+  const r = $("ruler");
+  r.querySelectorAll(".tick,.ticklab").forEach(e => e.remove());
+  [0,25,50,75,90,100].forEach(p => {
+    const t = document.createElement("div"); t.className = "tick"; t.style.left = p + "%"; r.appendChild(t);
+    const l = document.createElement("div"); l.className = "ticklab"; l.style.left = p + "%"; l.textContent = p; r.appendChild(l);
+  });
+}
+
+/* ============================================================
+   CHART
+   ============================================================ */
+function drawChart(sorted, stat, mbe){
+  const cv = $("cv"), ctx = cv.getContext("2d");
+  const dpr = window.devicePixelRatio || 1;
+  const W = cv.clientWidth, H = cv.clientHeight;
+  cv.width = W*dpr; cv.height = H*dpr; ctx.setTransform(dpr,0,0,dpr,0,0);
+  ctx.clearRect(0,0,W,H);
+
+  const padL = 58, padR = 46, padT = 14, padB = 34;
+  const x0 = padL, x1 = W-padR, y0 = padT, y1 = H-padB;
+  const N = sorted.length;
+
+  let lo = quantile(sorted,0.2), hi = quantile(sorted,99.8);
+  lo = Math.min(lo, stat, mbe); hi = Math.max(hi, stat, mbe);
+  const span = hi - lo; lo -= span*0.03; hi += span*0.03;
+
+  const BINS = Math.min(80, Math.max(30, Math.round(W/12)));
+  const bw = (hi-lo)/BINS;
+  const counts = new Float64Array(BINS);
+  for (let i=0;i<N;i++){
+    let b = Math.floor((sorted[i]-lo)/bw);
+    if (b < 0) b = 0; if (b >= BINS) b = BINS-1;
+    counts[b]++;
+  }
+  let maxC = 0; for (let i=0;i<BINS;i++) if (counts[i] > maxC) maxC = counts[i];
+
+  const px = v => x0 + (v-lo)/(hi-lo)*(x1-x0);
+  const py = c => y1 - c/maxC*(y1-y0);
+
+  // horizontal gridlines
+  ctx.strokeStyle = "#E3E8E6"; ctx.lineWidth = 1;
+  for (let g=0; g<=4; g++){
+    const y = y0 + (y1-y0)*g/4;
+    ctx.beginPath(); ctx.moveTo(x0,y); ctx.lineTo(x1,y); ctx.stroke();
+  }
+
+  // histogram
+  ctx.fillStyle = "#DCE9EA"; ctx.strokeStyle = "#AFC7CA"; ctx.lineWidth = .6;
+  for (let i=0;i<BINS;i++){
+    if (!counts[i]) continue;
+    const xa = px(lo + i*bw), xb = px(lo + (i+1)*bw), y = py(counts[i]);
+    ctx.fillRect(xa, y, Math.max(1, xb-xa-0.6), y1-y);
+    ctx.strokeRect(xa+.3, y+.3, Math.max(1, xb-xa-1.2), y1-y);
+  }
+
+  // cumulative curve
+  ctx.strokeStyle = "#0B3A44"; ctx.lineWidth = 1.6; ctx.beginPath();
+  const STEPS = 200;
+  for (let i=0;i<=STEPS;i++){
+    const p = i/STEPS*100, q = quantile(sorted,p);
+    const X = px(q), Y = y1 - (p/100)*(y1-y0);
+    if (X < x0-2 || X > x1+2) continue;
+    i===0 ? ctx.moveTo(X,Y) : ctx.lineTo(X,Y);
+  }
+  ctx.stroke();
+
+  // markers
+  function marker(v, color, label, side){
+    const X = px(v);
+    if (X < x0 || X > x1) return;
+    ctx.save();
+    ctx.strokeStyle = color; ctx.lineWidth = 1.6;
+    ctx.beginPath(); ctx.moveTo(X, y0-4); ctx.lineTo(X, y1); ctx.stroke();
+    ctx.fillStyle = color;
+    ctx.font = "600 11px 'IBM Plex Mono', monospace";
+    ctx.textAlign = side === "left" ? "right" : "left";
+    ctx.fillText(label, X + (side==="left" ? -6 : 6), y0+10);
+    ctx.restore();
+  }
+  marker(mbe,  "#B0790C", "MBE " + fMio(mbe), px(mbe) > px(stat) ? "right" : "left");
+  marker(stat, "#A4302B", "Statutory " + fMio(stat), px(stat) >= px(mbe) ? "right" : "left");
+
+  // axes
+  ctx.strokeStyle = "#A8B2AF"; ctx.lineWidth = 1;
+  ctx.beginPath(); ctx.moveTo(x0,y1); ctx.lineTo(x1,y1); ctx.stroke();
+
+  ctx.fillStyle = "#5D686D"; ctx.font = "10px 'IBM Plex Mono', monospace"; ctx.textAlign = "center";
+  for (let g=0; g<=5; g++){
+    const v = lo + (hi-lo)*g/5, X = px(v);
+    ctx.beginPath(); ctx.moveTo(X,y1); ctx.lineTo(X,y1+4); ctx.stroke();
+    ctx.fillText(fMio(v), X, y1+17);
+  }
+  ctx.textAlign = "right";
+  for (let g=0; g<=4; g++){
+    const y = y1 - (y1-y0)*g/4;
+    ctx.fillText((g*25) + "%", x1+38, y+3);
+  }
+  ctx.save();
+  ctx.translate(14, (y0+y1)/2); ctx.rotate(-Math.PI/2);
+  ctx.textAlign = "center"; ctx.fillStyle = "#8B959A";
+  ctx.font = "10px 'IBM Plex Mono', monospace";
+  ctx.fillText("FREQUENCY", 0, 0);
+  ctx.restore();
+  ctx.textAlign = "center"; ctx.fillStyle = "#8B959A";
+  ctx.fillText("TOTAL EARNED RESERVES MBE SIMULATED", (x0+x1)/2, H-4);
+}
+
+/* ============================================================
+   ORCHESTRATION
+   ============================================================ */
+function markStale(){
+  STALE = true;
+  const st = $("status");
+  st.className = "status stale";
+  st.textContent = RESULT ? "Inputs changed — run the simulation again." : "Ready.";
+}
+function renderAll(){
+  const M = derive();
+  updateInputCalcs(M);
+  renderSettings(M);
+  renderOutput();
+  renderNote();
+  if (!STALE || !RESULT) renderDistribution();   // don't re-read a stale curve with fresh inputs
+  $("hs-mbe").textContent  = fMoney(M.totals.earnedMbe);
+  $("hs-stat").textContent = fMoney(M.totals.earnedSt);
+  if (STALE && RESULT) $("hs-pct").textContent = "stale";
+  if (!RESULT) $("hs-pct").textContent = "—";
+}
+
+$("btn-run").addEventListener("click", () => {
+  const btn = $("btn-run"); btn.disabled = true;
+  if (!S.lockSeed){                       // a new draw of the dice on every run
+    S.seed = Math.floor(Math.random()*1e9) + 1;
+    $("in-seed").value = S.seed;
+  }
+  $("prog").classList.add("on");
+  $("status").className = "status"; $("status").textContent = "Running…";
+  const t0 = performance.now();
+  setTimeout(() => simulate(
+    p => { $("prog").firstElementChild.style.width = (p*100).toFixed(0) + "%"; },
+    res => {
+      RESULT = res; STALE = false;
+      $("prog").firstElementChild.style.width = "100%";
+      setTimeout(() => { $("prog").classList.remove("on"); $("prog").firstElementChild.style.width = "0%"; }, 300);
+      btn.disabled = false;
+      $("status").textContent = res.N.toLocaleString("en-US") + " iterations in " + ((performance.now()-t0)/1000).toFixed(1) + "s" +
+        (res.keepDraws ? "" : " · scenario view off at this iteration count");
+      renderOutput(); renderNote(); renderDistribution();
+      const M = derive();
+      $("hs-pct").textContent = pctOf(res.sorted, M.totals.earnedSt).toFixed(1) + ordSafe(pctOf(res.sorted, M.totals.earnedSt));
+      selectTab("dist");
+    }), 30);
+});
+
+function bindSetting(id, key, transform){
+  $(id).addEventListener("input", () => {
+    const str = $(id).value;
+    const v = transform ? transform(str) : parseFloat(str);
+    if (v === null || (typeof v === "number" && !isFinite(v))) return;
+    S[key] = v; markStale(); renderAll();
+  });
+}
+function bindTextSetting(id, key, toState, toDisplay){
+  const e = $(id);
+  e.addEventListener("focus", () => { e.value = raw(toDisplay.rawOf(S[key])); e.select(); });
+  e.addEventListener("input", () => {
+    const v = parseNum(e.value);
+    if (v === null) return;
+    S[key] = toState(v); markStale(); renderAll();
+  });
+  e.addEventListener("blur", () => { e.value = toDisplay.fmt(S[key]); });
+  e.addEventListener("keydown", ev => { if (ev.key === "Enter") e.blur(); });
+}
+bindTextSetting("in-mean","varMean", v => v/100, {rawOf:v => v*100, fmt:v => fPctIn(v,2)});
+bindTextSetting("in-sd","varSd",     v => v/100, {rawOf:v => v*100, fmt:v => fPctIn(v,2)});
+bindTextSetting("in-iter","iterations", v => Math.max(1000, Math.min(1000000, Math.round(v))),
+                {rawOf:v => v, fmt:v => Math.round(v).toLocaleString("en-US")});
+bindSetting("in-floor","floorPct");
+bindSetting("in-ceil","ceilPct");
+bindSetting("in-seed","seed", r => Math.round(parseFloat(r)));
+bindSetting("in-rho","rho");
+$("in-clipbase").addEventListener("change", () => { S.clipBase = $("in-clipbase").value; markStale(); renderAll(); });
+$("in-dist").addEventListener("change", () => { S.dist = $("in-dist").value; markStale(); renderAll(); });
+$("in-lockseed").addEventListener("change", () => { S.lockSeed = $("in-lockseed").checked; });
+
+$("in-scenario").addEventListener("change", () => {
+  $("fld-scenpct").hidden = $("in-scenario").value !== "custom";
+  renderOutput();
+});
+$("in-scenpct").addEventListener("input", renderOutput);
+
+$("btn-syncmean").addEventListener("click", () => {
+  S.varMean = derive().totals.gulrMbe; markStale(); renderAll();
+});
+$("btn-addrow").addEventListener("click", () => {
+  const last = S.rows[S.rows.length-1];
+  const next = (parseInt(last?.uwy,10) || 2026) + 1;
+  S.rows.push({uwy:String(next), premium:0, caseRes:0, incurred:0, sibnr:0, ibnrMbe:0, ibnrStat:0, earned:0});
+  markStale(); buildTables(); renderAll();
+});
+$("btn-reset").addEventListener("click", () => {
+  S = structuredClone(DEFAULTS); RESULT = null; markStale(); buildTables(); renderAll();
+  $("status").textContent = "Inputs reset to the values from new_MC.xlsx.";
+});
+$("btn-export-json").addEventListener("click", () => {
+  download("reserve-simulator-inputs.json", JSON.stringify(S, null, 2), "application/json");
+});
+$("btn-import-json").addEventListener("click", () => $("file-json").click());
+$("file-json").addEventListener("change", e => {
+  const f = e.target.files[0]; if (!f) return;
+  const r = new FileReader();
+  r.onload = () => {
+    try {
+      const o = JSON.parse(r.result);
+      if (!o.rows || !Array.isArray(o.rows)) throw new Error("no rows");
+      S = Object.assign(structuredClone(DEFAULTS), o);
+      RESULT = null; markStale(); buildTables(); renderAll();
+      $("status").textContent = "Loaded " + f.name + ".";
+    } catch(err){
+      $("status").className = "status stale";
+      $("status").textContent = "That file isn't a saved input set. Export one first, then reload it.";
+    }
+    e.target.value = "";
+  };
+  r.readAsText(f);
+});
+$("btn-csv-sum").addEventListener("click", () => {
+  if (!RESULT) return;
+  const M = derive(), s = RESULT.sorted;
+  const L = [];
+  L.push("Reserve distribution simulator — summary");
+  L.push("Distribution,"+DIST_LABEL[RESULT.dist]);
+  L.push("Iterations,"+RESULT.N); L.push("Seed,"+S.seed);
+  L.push("Cap base,"+S.clipBase); L.push("Floor %,"+S.floorPct); L.push("Ceiling %,"+S.ceilPct);
+  L.push("Correlation,"+S.rho);
+  L.push("");
+  L.push("Earned MBE reserves,"+M.totals.earnedMbe);
+  L.push("Earned statutory reserves,"+M.totals.earnedSt);
+  L.push("Statutory percentile,"+pctOf(s,M.totals.earnedSt).toFixed(3));
+  L.push("MBE percentile,"+pctOf(s,M.totals.earnedMbe).toFixed(3));
+  L.push("");
+  L.push("Percentile,Total earned reserves MBE simulated");
+  for (let p=1;p<=99;p++) L.push(p+","+quantile(s,p).toFixed(2));
+  [99.5,99.9].forEach(p => L.push(p+","+quantile(s,p).toFixed(2)));
+  L.push("");
+  L.push("UWY,Mean IBNR GULR,Std deviation,Floor,Ceiling,Earned MBE reserves,Earned stat reserves");
+  M.rows.forEach(r => L.push([r.uwy,r.meanLr,r.sd,r.floor,r.ceil,r.earnedMbe,r.earnedSt].join(",")));
+  L.push("");
+  L.push("Reporting note");
+  noteText().split("\n\n").forEach(t => L.push('"' + t.replace(/"/g,'""') + '"'));
+  download("reserve-distribution-summary.csv", L.join("\n"), "text/csv");
+});
+$("btn-csv-draws").addEventListener("click", () => {
+  if (!RESULT) return;
+  const parts = ["iteration,total_earned_reserves_mbe_simulated\n"];
+  const chunk = [];
+  for (let i=0;i<RESULT.N;i++){
+    chunk.push((i+1)+","+RESULT.totals[i].toFixed(2));
+    if (chunk.length === 20000){ parts.push(chunk.join("\n")+"\n"); chunk.length = 0; }
+  }
+  if (chunk.length) parts.push(chunk.join("\n"));
+  download("simulated-totals.csv", parts.join(""), "text/csv");
+});
+["in-book","in-valdate","in-currency"].forEach(id => {
+  const key = {"in-book":"book","in-valdate":"valDate","in-currency":"currency"}[id];
+  $(id).addEventListener("input", () => { S[key] = $(id).value; renderNote(); });
+});
+
+async function copyText(text, okMsg){
+  const note = $("copynote");
+  try {
+    await navigator.clipboard.writeText(text);
+    note.textContent = okMsg;
+  } catch(e){
+    const ta = document.createElement("textarea");
+    ta.value = text; ta.style.position = "fixed"; ta.style.opacity = "0";
+    document.body.appendChild(ta); ta.select();
+    const ok = document.execCommand("copy");
+    document.body.removeChild(ta);
+    note.textContent = ok ? okMsg : "Clipboard blocked here. Select the text above and copy manually.";
+  }
+  setTimeout(() => { note.textContent = "Plain text — paste into Word, Outlook or the ORSA template."; }, 4000);
+}
+$("btn-copy-note").addEventListener("click", () => {
+  const ps = noteParagraphs().length;
+  copyText(noteText(), "Copied — " + ps + " paragraph" + (ps===1?"":"s") + " on the clipboard.");
+});
+$("btn-dl-note").addEventListener("click", () => {
+  download("reserve-adequacy-note.txt", noteText(), "text/plain");
+});
+
+function download(name, text, mime){
+  const b = new Blob([text], {type:mime});
+  const u = URL.createObjectURL(b);
+  const a = document.createElement("a");
+  a.href = u; a.download = name; a.click();
+  setTimeout(() => URL.revokeObjectURL(u), 1000);
+}
+
+/* tabs */
+function selectTab(which){
+  const map = {inputs:"p-inputs", output:"p-output", dist:"p-dist", note:"p-note"};
+  Object.entries(map).forEach(([k,p]) => {
+    const on = k === which;
+    $("tab-"+k).setAttribute("aria-selected", on ? "true" : "false");
+    $(p).hidden = !on;
+  });
+  if (which === "dist" && RESULT && !STALE) renderDistribution();
+  if (which === "note") renderNote();
+  window.scrollTo({top:0, behavior:"instant"});
+}
+["inputs","output","dist","note"].forEach(k => $("tab-"+k).addEventListener("click", () => selectTab(k)));
+window.addEventListener("resize", () => { if (RESULT && !$("p-dist").hidden){ const M = derive(); drawChart(RESULT.sorted, M.totals.earnedSt, M.totals.earnedMbe); } });
+
+buildTables();
+renderAll();
+</script>
+</body>
+</html>
