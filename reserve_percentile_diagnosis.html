@@ -1,0 +1,286 @@
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Why the portfolio sits at the 87th percentile &#8212; diagnosis and options</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans:wght@400;500;600;700&family=IBM+Plex+Sans+Condensed:wght@600;700&display=swap" rel="stylesheet">
+<style>
+:root{--paper:#E7EAE6;--panel:#fff;--panel-alt:#F4F6F3;--ink:#13181B;--muted:#5D686D;--faint:#8B959A;
+--rule:#CDD4D1;--rule-strong:#A8B2AF;--teal:#0A6E80;--teal-deep:#0B3A44;--teal-wash:#DCE9EA;
+--crimson:#A4302B;--crimson-wash:#F3E0DE;--amber:#B0790C;
+--mono:"IBM Plex Mono",ui-monospace,monospace;--sans:"IBM Plex Sans",-apple-system,"Segoe UI",sans-serif;
+--cond:"IBM Plex Sans Condensed","IBM Plex Sans",sans-serif}
+*{box-sizing:border-box}body{margin:0;background:var(--paper);color:var(--ink);font-family:var(--sans);font-size:14.5px;line-height:1.62}
+.wrap{max-width:1000px;margin:0 auto;padding:0 22px 90px}
+header{border-bottom:1px solid var(--rule-strong);margin-bottom:26px;padding:30px 0 18px}
+h1{font-family:var(--cond);font-weight:700;font-size:29px;letter-spacing:-.012em;margin:0 0 5px}
+header p{margin:0;color:var(--muted);font-family:var(--mono);font-size:12px;letter-spacing:.02em}
+h2{font-family:var(--cond);font-weight:700;font-size:15px;letter-spacing:.055em;text-transform:uppercase;
+margin:34px 0 10px;padding-bottom:6px;border-bottom:1px solid var(--rule)}
+h2 .n{font-family:var(--mono);font-size:11px;color:var(--faint);margin-right:9px;font-weight:500}
+h3{font-family:var(--cond);font-weight:700;font-size:13.5px;letter-spacing:.03em;margin:20px 0 6px}
+p{margin:0 0 .95em;max-width:88ch}
+b,strong{font-weight:600}
+.mono{font-family:var(--mono);font-size:13.5px}
+.lead{font-size:16px;border-left:3px solid var(--crimson);background:var(--crimson-wash);padding:13px 16px;margin:0 0 22px}
+.lead b{font-family:var(--mono);font-size:15px}
+.ans{border-left:3px solid var(--teal);background:var(--teal-wash);padding:13px 16px;margin:16px 0}
+.card{background:var(--panel);border:1px solid var(--rule);border-radius:3px;padding:16px 18px;margin:0 0 20px}
+.ts{overflow-x:auto;margin:0 0 18px}
+table{border-collapse:collapse;width:100%;font-variant-numeric:tabular-nums;background:var(--panel)}
+th,td{text-align:right;padding:6px 10px;border-bottom:1px solid var(--rule);white-space:nowrap;font-family:var(--mono);font-size:12.5px}
+th{font-size:9.5px;letter-spacing:.055em;text-transform:uppercase;color:var(--muted);background:var(--panel-alt);
+border-bottom:1px solid var(--rule-strong);font-weight:500}
+th.lbl,td.lbl{text-align:left}
+td.lbl{font-family:var(--sans);font-weight:500;font-size:12.5px}
+td.hi{color:var(--teal);font-weight:600} td.bad{color:var(--crimson);font-weight:600}
+tbody tr:last-child td{border-bottom:none}
+.tiles{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:1px;background:var(--rule);margin:0 0 20px}
+.tile{background:var(--panel);padding:13px 15px}
+.tile .k{font-family:var(--mono);font-size:9.5px;letter-spacing:.08em;text-transform:uppercase;color:var(--faint);display:block;margin-bottom:4px}
+.tile .v{font-family:var(--mono);font-size:20px;font-weight:600;display:block;letter-spacing:-.01em}
+.tile .v.c{color:var(--crimson)}.tile .v.t{color:var(--teal)}.tile .v.a{color:var(--amber)}
+.tile .s{font-size:11.5px;color:var(--muted);display:block;margin-top:3px;line-height:1.45}
+svg{display:block;background:var(--panel);border:1px solid var(--rule);border-radius:3px}
+.hd{font-family:var(--mono);font-size:9.5px;letter-spacing:.07em;fill:#8B959A}
+.cl{font-family:var(--mono);font-size:11px;fill:#13181B;font-weight:500}
+.cl2{font-family:var(--sans);font-size:12px;fill:#13181B}
+.vl{font-family:var(--mono);font-size:10px;font-weight:600}
+.ax{font-family:var(--mono);font-size:9.5px;fill:#8B959A}
+.leg{display:flex;gap:20px;font-size:11.5px;color:var(--muted);padding:9px 2px 20px;flex-wrap:wrap}
+.leg i{display:inline-block;width:11px;height:7px;border-radius:3.5px;vertical-align:1px;margin-right:6px}
+.rec{border:2px solid var(--teal);border-radius:3px;padding:16px 18px;background:var(--panel)}
+.rec h3{margin-top:0;color:var(--teal)}
+ul,ol{max-width:88ch;margin:0 0 1em;padding-left:22px}li{margin:.3em 0}
+.foot{font-size:11.5px;color:var(--faint);border-top:1px solid var(--rule);padding-top:14px;margin-top:34px}
+code{font-family:var(--mono);font-size:13px;background:var(--panel-alt);padding:1px 4px;border-radius:2px}
+</style></head><body><div class="wrap">
+
+<header>
+<h1>Why the portfolio sits at the 87th percentile</h1>
+<p>Barents Reinsurance S.A. &#183; reserve distribution simulator &#183; MC_inputs_2026 &#183; diagnosis and options</p>
+</header>
+
+<div class="lead">
+Booked earned statutory reserves of <b>345,498,255</b> exceed the best estimate of <b>319,823,918</b> by
+<b>25,674,337</b>, which is <b>8.0%</b> of the best estimate. A margin of 8% of reserves lands at the
+87th percentile <i>only if</i> the portfolio reserve volatility is 8.1%. That is the number to argue about &#8212; not the percentile.
+</div>
+
+<div class="ans">
+<b>Conclusion.</b> The 87th is almost entirely an artefact of the <b>zero correlation between reserving classes</b>,
+which no regulatory calibration permits. Setting it to the Solvency&nbsp;II floor of 0.25 alone gives <b>78.0th</b>.
+Your first intuition is right and sharper than stated: energy is <b>46%</b> of the earned IBNR but <b>97%</b>
+of the modelled variance, and life is <b>40%</b> of the IBNR against <b>1.5%</b> of the variance.
+Your second intuition is real but it distorts the <i>class</i> percentiles, not the portfolio: flooring the life CoVs moves
+LIMED from the 94th to the 67th and the portfolio by half a point.
+</div>
+
+<div class="tiles">
+<div class="tile"><span class="k">Statutory margin</span><span class="v c">8.0%</span><span class="s">25,674,337 over the best estimate</span></div>
+<div class="tile"><span class="k">Modelled portfolio std dev</span><span class="v c">8.1%</span><span class="s">Implies the 87.4th percentile</span></div>
+<div class="tile"><span class="k">Std dev needed for the 75th</span><span class="v t">11.9%</span><span class="s">For the 80th, 9.5%</span></div>
+<div class="tile"><span class="k">Reserves carrying no risk</span><span class="v a">52%</span><span class="s">164,821,223 of case reserves and SIBNR, modelled as certain</span></div>
+</div>
+
+<h2><span class="n">01</span>The question is a volatility question, not a percentile question</h2>
+<p>The percentile is pure arithmetic once the margin and the volatility are fixed. Reading it backwards
+shows what belief about volatility each answer corresponds to. Volatility here means the standard deviation of the total earned reserve requirement, as a percentage of the best estimate.</p>
+<div class="ts"><table class=""><thead><tr><th class=lbl>Target percentile</th><th>z</th><th>Required std deviation of total reserves</th><th>as % of best estimate</th></tr></thead><tbody><tr><td class=lbl>70th</td><td>0.524</td><td>48,959,404</td><td class='hi'>15.3%</td></tr><tr><td class=lbl>75th</td><td>0.674</td><td>38,064,829</td><td class='hi'>11.9%</td></tr><tr><td class=lbl>80th</td><td>0.842</td><td>30,505,809</td><td class='hi'>9.5%</td></tr><tr><td class=lbl>85th</td><td>1.036</td><td>24,771,816</td><td class=''>7.7%</td></tr><tr><td class=lbl>90th</td><td>1.282</td><td>20,033,791</td><td class=''>6.3%</td></tr></tbody></table></div>
+<p>So an expectation of the 70th&#8211;80th is exactly the belief that portfolio reserve volatility is
+<b>10&#8211;15%</b> of the best estimate. The model says <b>8.1%</b>. The rest of this note asks which of the two is wrong.</p>
+
+<h3>An external check</h3>
+<p>The Solvency&nbsp;II standard formula sets reserve-risk standard deviations of 8&#8211;20% by segment, and all three
+<i>non-proportional reinsurance</i> segments &#8212; casualty, marine/aviation/transport and property &#8212; sit at <b>20%</b>.
+Its inter-segment correlations run from <b>0.25 to 0.50</b>; zero does not appear anywhere. Applying that shape to this book:</p>
+<div class="ts"><table class=""><thead><tr><th class=lbl>Std deviation per class</th><th>Correlation between classes</th><th>Portfolio std deviation</th><th>as % of BE</th><th>Percentile of the booked figure</th></tr></thead><tbody><tr><td class=lbl>10%</td><td>0.25</td><td>20,260,643</td><td>6.3%</td><td class=''>89.5th</td></tr><tr><td class=lbl>10%</td><td>0.50</td><td>24,791,535</td><td>7.8%</td><td class=''>85.0th</td></tr><tr><td class=lbl>15%</td><td>0.25</td><td>30,390,964</td><td>9.5%</td><td class=''>80.6th</td></tr><tr><td class=lbl>15%</td><td>0.50</td><td>37,187,303</td><td>11.6%</td><td class='hi'>76.6th</td></tr><tr><td class=lbl>20%</td><td>0.25</td><td>40,521,285</td><td>12.7%</td><td class='hi'>75.0th</td></tr><tr><td class=lbl>20%</td><td>0.50</td><td>49,583,070</td><td>15.5%</td><td class='hi'>71.8th</td></tr></tbody></table></div>
+<p>For a non-proportional reinsurer the standard-formula analogue gives the <b>71.8th to 75.0th</b>. Your expectation is
+well founded; the model is the outlier.</p>
+
+<h2><span class="n">02</span>The aggregation is dominated by two classes and three cells</h2>
+<p>With classes drawn independently the variances add, so each class's contribution is its own standard deviation squared.
+The result is extreme concentration &#8212; and it is the mechanism behind the skew you sensed.</p>
+<svg viewBox="0 0 720 368" width="100%" role="img" aria-label="Share of earned IBNR against share of modelled variance, by reserving class">
+<text x="66" y="13" class="hd">SHARE OF EARNED IBNR &#8212; against &#8212; SHARE OF THE MODELLED VARIANCE</text>
+<line x1="66.0" y1="26" x2="66.0" y2="344" stroke="#E3E8E6"/><text x="66.0" y="357" text-anchor="middle" class="ax">0%</text><line x1="216.0" y1="26" x2="216.0" y2="344" stroke="#E3E8E6"/><text x="216.0" y="357" text-anchor="middle" class="ax">25%</text><line x1="366.0" y1="26" x2="366.0" y2="344" stroke="#E3E8E6"/><text x="366.0" y="357" text-anchor="middle" class="ax">50%</text><line x1="516.0" y1="26" x2="516.0" y2="344" stroke="#E3E8E6"/><text x="516.0" y="357" text-anchor="middle" class="ax">75%</text><line x1="666.0" y1="26" x2="666.0" y2="344" stroke="#E3E8E6"/><text x="666.0" y="357" text-anchor="middle" class="ax">100%</text><text x="57" y="47" text-anchor="end" class="cl">ENDWM</text>
+<rect x="66" y="36.5" width="133.0" height="7" rx="3.5" fill="#B0790C"/>
+<rect x="66" y="46" width="396.0" height="7" rx="3.5" fill="#0A6E80"/>
+<text x="469.0" y="42" class="vl" fill="#B0790C">22%</text>
+<text x="469.0" y="51.5" class="vl" fill="#0A6E80">66.0%</text><text x="57" y="69" text-anchor="end" class="cl">ENUPS</text>
+<rect x="66" y="58.5" width="106.7" height="7" rx="3.5" fill="#B0790C"/>
+<rect x="66" y="68" width="176.7" height="7" rx="3.5" fill="#0A6E80"/>
+<text x="249.7" y="64" class="vl" fill="#B0790C">18%</text>
+<text x="249.7" y="73.5" class="vl" fill="#0A6E80">29.4%</text><text x="57" y="91" text-anchor="end" class="cl">LIIND</text>
+<rect x="66" y="80.5" width="120.2" height="7" rx="3.5" fill="#B0790C"/>
+<rect x="66" y="90" width="7.7" height="7" rx="3.5" fill="#0A6E80"/>
+<text x="193.2" y="86" class="vl" fill="#B0790C">20%</text>
+<text x="193.2" y="95.5" class="vl" fill="#0A6E80">1.3%</text><text x="57" y="113" text-anchor="end" class="cl">DCBON</text>
+<rect x="66" y="102.5" width="10.8" height="7" rx="3.5" fill="#B0790C"/>
+<rect x="66" y="112" width="7.1" height="7" rx="3.5" fill="#0A6E80"/>
+<text x="83.8" y="108" class="vl" fill="#B0790C">2%</text>
+<text x="83.8" y="117.5" class="vl" fill="#0A6E80">1.2%</text><text x="57" y="135" text-anchor="end" class="cl">DCFIL</text>
+<rect x="66" y="124.5" width="55.7" height="7" rx="3.5" fill="#B0790C"/>
+<rect x="66" y="134" width="6.4" height="7" rx="3.5" fill="#0A6E80"/>
+<text x="128.7" y="130" class="vl" fill="#B0790C">9%</text>
+<text x="128.7" y="139.5" class="vl" fill="#0A6E80">1.1%</text><text x="57" y="157" text-anchor="end" class="cl">DBENR</text>
+<rect x="66" y="146.5" width="6.2" height="7" rx="3.5" fill="#B0790C"/>
+<rect x="66" y="156" width="2.5" height="7" rx="3.5" fill="#0A6E80"/>
+<text x="79.2" y="152" class="vl" fill="#B0790C">1%</text>
+<text x="79.2" y="161.5" class="vl" fill="#0A6E80">0.4%</text><text x="57" y="179" text-anchor="end" class="cl">LISHT</text>
+<rect x="66" y="168.5" width="61.5" height="7" rx="3.5" fill="#B0790C"/>
+<rect x="66" y="178" width="1.3" height="7" rx="3.5" fill="#0A6E80"/>
+<text x="134.5" y="174" class="vl" fill="#B0790C">10%</text>
+<text x="134.5" y="183.5" class="vl" fill="#0A6E80">0.2%</text><text x="57" y="201" text-anchor="end" class="cl">ENCON</text>
+<rect x="66" y="190.5" width="21.0" height="7" rx="3.5" fill="#B0790C"/>
+<rect x="66" y="200" width="1.2" height="7" rx="3.5" fill="#0A6E80"/>
+<text x="94.0" y="196" class="vl" fill="#B0790C">4%</text>
+<text x="94.0" y="205.5" class="vl" fill="#0A6E80">0.2%</text><text x="57" y="223" text-anchor="end" class="cl">PRTOT</text>
+<rect x="66" y="212.5" width="11.3" height="7" rx="3.5" fill="#B0790C"/>
+<rect x="66" y="222" width="1.2" height="7" rx="3.5" fill="#0A6E80"/>
+<text x="84.3" y="218" class="vl" fill="#B0790C">2%</text>
+<text x="84.3" y="227.5" class="vl" fill="#0A6E80">0.1%</text><text x="57" y="245" text-anchor="end" class="cl">DCMAR</text>
+<rect x="66" y="234.5" width="11.6" height="7" rx="3.5" fill="#B0790C"/>
+<rect x="66" y="244" width="1.2" height="7" rx="3.5" fill="#0A6E80"/>
+<text x="84.6" y="240" class="vl" fill="#B0790C">2%</text>
+<text x="84.6" y="249.5" class="vl" fill="#0A6E80">0.1%</text><text x="57" y="267" text-anchor="end" class="cl">LIMED</text>
+<rect x="66" y="256.5" width="55.9" height="7" rx="3.5" fill="#B0790C"/>
+<rect x="66" y="266" width="1.2" height="7" rx="3.5" fill="#0A6E80"/>
+<text x="128.9" y="262" class="vl" fill="#B0790C">9%</text>
+<text x="128.9" y="271.5" class="vl" fill="#0A6E80">0.0%</text><text x="57" y="289" text-anchor="end" class="cl">DBLIF</text>
+<rect x="66" y="278.5" width="1.6" height="7" rx="3.5" fill="#B0790C"/>
+<rect x="66" y="288" width="1.2" height="7" rx="3.5" fill="#0A6E80"/>
+<text x="74.6" y="284" class="vl" fill="#B0790C">0%</text>
+<text x="74.6" y="293.5" class="vl" fill="#0A6E80">0.0%</text><text x="57" y="311" text-anchor="end" class="cl">DCLIA</text>
+<rect x="66" y="300.5" width="3.1" height="7" rx="3.5" fill="#B0790C"/>
+<rect x="66" y="310" width="1.2" height="7" rx="3.5" fill="#0A6E80"/>
+<text x="76.1" y="306" class="vl" fill="#B0790C">1%</text>
+<text x="76.1" y="315.5" class="vl" fill="#0A6E80">0.0%</text><text x="57" y="333" text-anchor="end" class="cl">LIMLT</text>
+<rect x="66" y="322.5" width="1.4" height="7" rx="3.5" fill="#B0790C"/>
+<rect x="66" y="332" width="1.2" height="7" rx="3.5" fill="#0A6E80"/>
+<text x="74.4" y="328" class="vl" fill="#B0790C">0%</text>
+<text x="74.4" y="337.5" class="vl" fill="#0A6E80">0.0%</text></svg>
+<div class="leg"><span><i style="background:#B0790C"></i>Share of earned IBNR &#8212; how much money is at stake</span>
+<span><i style="background:#0A6E80"></i>Share of the modelled variance &#8212; how much risk the model assigns</span></div>
+<p>Energy carries <b>46%</b> of the earned IBNR and <b>97%</b> of the variance. Life carries
+<b>40%</b> of the IBNR and <b>1.5%</b> of the variance. Because the statutory margin is spread across
+the whole book, the life block contributes <b>23%</b> of the margin and almost none of the risk it is
+supposed to be covering. That mismatch mechanically buys percentile.</p>
+<p>At cell level the concentration is starker still: of 14 classes and 76 simulated
+class-and-year cells, three cells carry <b>80%</b> of the modelled variance.</p>
+<div class="ts"><table class=""><thead><tr><th class=lbl>Cell</th><th>Earned IBNR</th><th>CoV</th><th>Standard deviation</th><th>Share of variance</th></tr></thead><tbody><tr><td class=lbl>ENDWM 2025</td><td>17,581,032</td><td>1.083</td><td>19,034,189</td><td>54.2%</td></tr><tr><td class=lbl>ENUPS 2025</td><td>10,407,574</td><td>0.965</td><td>10,039,978</td><td>15.1%</td></tr><tr><td class=lbl>ENUPS 2024</td><td>8,857,691</td><td>0.965</td><td>8,544,837</td><td>10.9%</td></tr><tr><td class=lbl>ENDWM 2024</td><td>4,604,547</td><td>1.083</td><td>4,985,135</td><td>3.7%</td></tr><tr><td class=lbl>ENDWM 2023</td><td>4,524,098</td><td>1.083</td><td>4,898,036</td><td>3.6%</td></tr><tr><td class=lbl>ENDWM 2026</td><td>4,316,743</td><td>1.083</td><td>4,673,542</td><td>3.3%</td></tr><tr><td class=lbl>ENUPS 2022</td><td>3,870,533</td><td>0.965</td><td>3,733,825</td><td>2.1%</td></tr><tr><td class=lbl>ENDWM 2022</td><td>2,608,516</td><td>1.083</td><td>2,824,122</td><td>1.2%</td></tr></tbody></table></div>
+<p><b>ENDWM 2025 alone is 54.2% of the portfolio variance.</b> The portfolio distribution is, to a good
+approximation, the distribution of two underwriting years of two energy classes. Any statement about the portfolio
+percentile is really a statement about those cells.</p>
+
+<h2><span class="n">03</span>What each lever is actually worth</h2>
+<p>Each applied on its own, from the 87.4th baseline, cap removed so the simulation is centred on the best estimate.</p>
+<svg viewBox="0 0 720 236" width="100%" role="img" aria-label="Percentile points removed by each modelling lever, applied one at a time">
+<text x="10" y="14" class="hd">PERCENTILE POINTS REMOVED, EACH LEVER APPLIED ALONE &#8212; FROM THE 87.4TH BASELINE</text>
+<text x="339" y="44" text-anchor="end" class="cl2">Correlation between classes 0 → 0.50</text>
+<rect x="348" y="34" width="266.7" height="13" rx="4" fill="#0A6E80"/>
+<text x="621.7" y="44" class="vl" fill="#0A6E80">-11.5 &#8594; 75.9th</text><text x="339" y="70" text-anchor="end" class="cl2">Correlation between classes 0 → 0.25  (Solvency II floor)</text>
+<rect x="348" y="60" width="216.9" height="13" rx="4" fill="#0A6E80"/>
+<text x="571.9" y="70" class="vl" fill="#0A6E80">-9.4 &#8594; 78.0th</text><text x="339" y="96" text-anchor="end" class="cl2">Correlation between classes 0 → 0.15</text>
+<rect x="348" y="86" width="166.9" height="13" rx="4" fill="#0A6E80"/>
+<text x="521.9" y="96" class="vl" fill="#0A6E80">-7.2 &#8594; 80.2th</text><text x="339" y="122" text-anchor="end" class="cl2">Extra correlation between underwriting years 0 → 1.00</text>
+<rect x="348" y="112" width="158.7" height="13" rx="4" fill="#0A6E80"/>
+<text x="513.7" y="122" class="vl" fill="#0A6E80">-6.8 &#8594; 80.5th</text><text x="339" y="148" text-anchor="end" class="cl2">Case reserves + SIBNR given a 15% CoV</text>
+<rect x="348" y="138" width="65.0" height="13" rx="4" fill="#0A6E80"/>
+<text x="420.0" y="148" class="vl" fill="#0A6E80">-2.8 &#8594; 84.6th</text><text x="339" y="174" text-anchor="end" class="cl2">Parameter uncertainty on the CoV</text>
+<rect x="348" y="164" width="15.6" height="13" rx="4" fill="#0A6E80"/>
+<text x="370.6" y="174" class="vl" fill="#0A6E80">-0.7 &#8594; 86.7th</text><text x="339" y="200" text-anchor="end" class="cl2">Life CoV floored at 0.25</text>
+<rect x="348" y="190" width="12.7" height="13" rx="4" fill="#0A6E80"/>
+<text x="367.7" y="200" class="vl" fill="#0A6E80">-0.5 &#8594; 86.8th</text></svg>
+<div class="leg"><span>Longer bar = larger reduction in the booked percentile.</span></div>
+<p>The ranking is unambiguous. <b>Correlation between classes is worth 7&#8211;11 points; recalibrating the life CoVs is worth
+half a point.</b> That is not because the life CoVs are defensible &#8212; they are not &#8212; but because life contributes
+almost no variance either way, so changing it cannot move the aggregate.</p>
+
+<h2><span class="n">04</span>Where each class's percentile comes from</h2>
+<p>For a class, the booked percentile is <code>&#934;(z)</code> with</p>
+<p class="mono" style="margin-left:8px"><b>z = u &#215; &#8730;n<sub>eff</sub> &#247; CoV</b></p>
+<p>where <code>u</code> is the statutory uplift on the earned IBNR, <code>n<sub>eff</sub></code> is the effective number of
+underwriting years (one divided by the sum of the squared year shares) and <code>CoV</code> is the class loss-ratio coefficient of variation.
+Case reserves and SIBNR cancel out of <code>z</code> entirely, because they are modelled as certain.</p>
+<div class="ts"><table class=""><thead><tr><th class=lbl>Class</th><th>CoV</th><th>Uplift u</th><th>Effective years</th><th>z</th><th>Percentile</th><th>Earned IBNR</th><th>Share of IBNR</th><th>Share of variance</th></tr></thead><tbody><tr><td class=lbl>ENDWM</td><td>1.083</td><td>23.2%</td><td>3.13</td><td>0.38</td><td>76.9th</td><td>34,356,393</td><td>22.2%</td><td>66.0%</td></tr><tr><td class=lbl>LIIND</td><td>0.125</td><td>11.0%</td><td>1.77</td><td>1.17</td><td>87.7th</td><td>31,064,709</td><td>20.0%</td><td>1.3%</td></tr><tr><td class=lbl>ENUPS</td><td>0.965</td><td>21.9%</td><td>3.59</td><td>0.43</td><td>75.9th</td><td>27,557,679</td><td>17.8%</td><td>29.4%</td></tr><tr><td class=lbl>LISHT</td><td>0.142</td><td>10.1%</td><td>3.53</td><td>1.34</td><td>90.6th</td><td>15,883,879</td><td>10.2%</td><td>0.2%</td></tr><tr><td class=lbl>LIMED</td><td>0.057</td><td>6.0%</td><td>2.25</td><td>1.59</td><td>94.0th</td><td>14,434,104</td><td>9.3%</td><td>0.0%</td></tr><tr><td class=lbl>DCFIL</td><td>0.369</td><td>16.1%</td><td>3.95</td><td>0.87</td><td>82.1th</td><td>14,392,042</td><td>9.3%</td><td>1.1%</td></tr><tr><td class=lbl>ENCON</td><td>0.374</td><td>20.9%</td><td>3.14</td><td>0.99</td><td>84.9th</td><td>5,427,035</td><td>3.5%</td><td>0.2%</td></tr><tr><td class=lbl>DCMAR</td><td>0.300</td><td>14.8%</td><td>2.22</td><td>0.73</td><td>79.1th</td><td>2,994,974</td><td>1.9%</td><td>0.1%</td></tr><tr><td class=lbl>PRTOT</td><td>0.484</td><td>19.4%</td><td>3.54</td><td>0.75</td><td>80.2th</td><td>2,919,136</td><td>1.9%</td><td>0.1%</td></tr><tr><td class=lbl>DCBON</td><td>1.866</td><td>25.0%</td><td>3.44</td><td>0.25</td><td>77.2th</td><td>2,787,769</td><td>1.8%</td><td>1.2%</td></tr><tr><td class=lbl>DBENR</td><td>1.068</td><td>24.3%</td><td>1.05</td><td>0.23</td><td>75.7th</td><td>1,593,025</td><td>1.0%</td><td>0.4%</td></tr><tr><td class=lbl>DCLIA</td><td>0.204</td><td>11.9%</td><td>1.09</td><td>0.61</td><td>75.3th</td><td>812,340</td><td>0.5%</td><td>0.0%</td></tr><tr><td class=lbl>DBLIF</td><td>0.965</td><td>11.0%</td><td>1.00</td><td>0.11</td><td>70.4th</td><td>422,413</td><td>0.3%</td><td>0.0%</td></tr><tr><td class=lbl>LIMLT</td><td>0.152</td><td>16.1%</td><td>2.00</td><td>1.50</td><td>92.6th</td><td>357,197</td><td>0.2%</td><td>0.0%</td></tr></tbody></table></div>
+<p>Two things to note. First, the <code>&#8730;n<sub>eff</sub></code> term is <b>pure artefact</b>: it is there only because the
+underwriting years of a class are drawn independently, which divides a class's volatility by up to two. For reserve
+risk that is the wrong assumption &#8212; a change in development pattern or in reserving basis hits every open year at once.
+Second, the CoV in <code>Inputs!Q:R</code> is an <b>ultimate-loss-ratio</b> volatility, i.e. an underwriting-risk measure,
+being used here as a reserve-risk measure. They are different quantities, and the substitution happens to look
+plausible for energy and implausible for life.</p>
+
+<h2><span class="n">05</span>The short life series: a class-level problem</h2>
+<p>LIMED's CoV of 0.057 comes from three underwriting years. It implies that a 14.4m IBNR is known to within
+&#177;0.8m, which is not credible for any reserving class. The consequence is visible only at class level.</p>
+<div class="ts"><table class=""><thead><tr><th class=lbl>Life CoV floor</th><th>LIIND</th><th>LISHT</th><th>LIMED</th><th>LIMLT</th><th>ENUPS</th><th>ENDWM</th><th>Portfolio</th></tr></thead><tbody><tr><td class=lbl>as fitted</td><td class='bad'>87.7</td><td class='bad'>90.6</td><td class='bad'>94.0</td><td class='bad'>92.6</td><td class='hi'>75.9</td><td class='hi'>76.9</td><td class="">87.4th</td></tr><tr><td class=lbl>0.20</td><td class='hi'>78.3</td><td class='bad'>83.3</td><td class='hi'>69.6</td><td class='bad'>87.1</td><td class='hi'>75.9</td><td class='hi'>76.9</td><td class="">87.1th</td></tr><tr><td class=lbl>0.25</td><td class='hi'>74.9</td><td class='hi'>79.0</td><td class='hi'>67.2</td><td class='bad'>82.7</td><td class='hi'>75.9</td><td class='hi'>76.9</td><td class="">86.8th</td></tr><tr><td class=lbl>0.30</td><td class='hi'>72.7</td><td class='hi'>76.0</td><td class='hi'>65.8</td><td class='hi'>79.4</td><td class='hi'>75.9</td><td class='hi'>76.9</td><td class="">86.6th</td></tr><tr><td class=lbl>0.35</td><td class='hi'>71.2</td><td class='hi'>73.8</td><td class='hi'>64.9</td><td class='hi'>77.0</td><td class='hi'>75.9</td><td class='hi'>76.9</td><td class="">86.2th</td></tr></tbody></table></div>
+<p>A floor of 0.25 brings all four life classes inside the same band as the rest of the book and leaves the portfolio
+essentially unchanged. This matters for the credibility of the class-level reporting, not for the headline.</p>
+
+<h2><span class="n">06</span>Candidate calibrations</h2>
+<p>Judged on two criteria at once: does the portfolio land in the 70th&#8211;80th you expected, and does the implied
+portfolio standard deviation sit in the 12.7&#8211;15.5% band that the standard-formula analogue supports? A calibration
+that hits the percentile with an indefensible standard deviation is not an improvement.</p>
+<div class="ts"><table class=""><thead><tr><th class=lbl></th><th>Corr. classes</th><th>Extra corr. years</th><th>Case + SIBNR CoV</th><th>Life CoV floor</th><th>Portfolio</th><th>Portfolio std deviation</th><th>Class range</th></tr></thead><tbody><tr><td class=lbl>A</td><td>0.15</td><td>0.00</td><td>&#8212;</td><td>&#8212;</td><td class=''>80.2th</td><td class='hi'>12.0%</td><td>70 &#8211; 92</td></tr><tr><td class=lbl>B</td><td>0.15</td><td>0.00</td><td>10%</td><td>0.25</td><td class='hi'>75.6th</td><td class='hi'>14.7%</td><td>66 &#8211; 81</td></tr><tr><td class=lbl>C</td><td>0.20</td><td>0.00</td><td>10%</td><td>0.25</td><td class='hi'>74.3th</td><td class=''>16.3%</td><td>66 &#8211; 81</td></tr><tr><td class=lbl>D</td><td>0.25</td><td>0.00</td><td>&#8212;</td><td>&#8212;</td><td class='hi'>78.0th</td><td class='hi'>14.1%</td><td>70 &#8211; 91</td></tr><tr><td class=lbl>E</td><td>0.25</td><td>0.00</td><td>10%</td><td>0.25</td><td class='hi'>73.4th</td><td class=''>17.7%</td><td>66 &#8211; 80</td></tr><tr><td class=lbl>F</td><td>0.25</td><td>0.25</td><td>10%</td><td>0.25</td><td class='hi'>73.4th</td><td class=''>18.4%</td><td>65 &#8211; 79</td></tr></tbody></table></div>
+
+<div class="card" style="border-left:3px solid var(--amber);background:#FBF4E5">
+<h3 style="margin-top:0">Correction to an earlier draft of this note</h3>
+<p style="margin-bottom:0">In the first version of these diagnostics the case-and-SIBNR component was drawn independently
+of everything else, which understated it: that component should take the portfolio-wide shock like any other part of the
+book. Corrected, candidate&nbsp;E lands at the <b>73.4th</b> rather than
+the 75.9th, with a standard deviation of <b>17.7%</b> rather than 15.6%.
+Every table in this note now uses the corrected treatment, and it is the one implemented in the tool. Whether the case
+component correlates with the IBNR of its <i>own</i> class on top of that turns out to make almost no difference to the
+aggregate.</p>
+</div>
+
+<div class="rec">
+<h3>Recommendation &#8212; candidate E</h3>
+<p style="margin-bottom:.5em"><b>&#961; between classes 0.25 &#183; case reserves and SIBNR at a 10% CoV &#183; life CoV floored at 0.25</b></p>
+<p style="margin-bottom:0">Portfolio <b>73.4th</b> with a portfolio &#963; of
+<b>17.7%</b>, every class between the
+66th and the 80th, and no
+component that cannot be defended in a regulatory conversation: 0.25 is the Annex&nbsp;IV floor, not a judgement;
+case reserve uncertainty is real and currently set to zero; and a 25% CoV floor is still below the standard-formula
+&#963; for every reinsurance segment.</p>
+<p style="margin:.9em 0 .4em;font-size:13px">The one component with no external anchor is the coefficient of variation
+placed on case reserves and SIBNR. It is the lever to turn if the standard deviation is judged too conservative:</p>
+<div class="ts"><table class=""><thead><tr><th class=lbl>Case + SIBNR CoV</th><th>Portfolio</th><th>Portfolio std deviation</th><th>Class range</th></tr></thead><tbody><tr><td class=lbl>0.0%</td><td class='hi'>76.4th</td><td class='hi'>15.3%</td><td>66 &#8211; 81</td></tr><tr><td class=lbl>5.0%</td><td class='hi'>74.9th</td><td class=''>16.5%</td><td>66 &#8211; 80</td></tr><tr><td class=lbl>7.5%</td><td class='hi'>74.1th</td><td class=''>17.1%</td><td>66 &#8211; 80</td></tr><tr><td class=lbl>10.0%</td><td class='hi'>73.4th</td><td class=''>17.7%</td><td>66 &#8211; 80</td></tr><tr><td class=lbl>15.0%</td><td class='hi'>72.0th</td><td class=''>19.1%</td><td>64 &#8211; 80</td></tr></tbody></table></div>
+<p style="margin:.2em 0 0;font-size:13px;color:var(--muted)">At zero &#8212; the workbook's own basis &#8212; the standard
+deviation sits inside the standard-formula range and the portfolio reads the 76.4th. At 10% it is
+above that range, which is a deliberate conservatism rather than a calibration error: case reserve run-off risk is real and
+the standard formula embeds it inside a single segment sigma rather than separating it.</p>
+<p style="margin:.7em 0 0;font-size:13px;color:var(--muted)">If a lower standard deviation is preferred, candidate&nbsp;C
+is the same package with the class correlation at 0.20 instead of 0.25 &#8212;
+74.3th at
+16.3%. Below 0.15 the calibration is no longer supportable by
+reference to the standard formula.</p>
+</div>
+
+<h2><span class="n">07</span>What to change in the tool</h2>
+<ol>
+<li><b>Defaults that are defensible rather than convenient.</b> &#961; between classes to 0.25, and a nested
+correlation structure &#8212; between business groups, between classes inside a group, between years inside a class &#8212;
+so that energy and life are not forced to share one number. This is the change that moves the headline.</li>
+<li><b>A concentration diagnostic.</b> The two tables in section 02, live in the tool: share of IBNR against share of
+variance by class, and the top cells. This is what makes a result like the 87th self-explaining instead of surprising.</li>
+<li><b>CoV governance per class.</b> Show the number of usable observations next to each CoV; offer the fitted value,
+a credibility-weighted value shrunk toward a peer-group benchmark with weight <code>n/(n+k)</code>, and a manual
+override with a comment field. Flag any class whose CoV rests on fewer than five years.</li>
+<li><b>Parameter uncertainty as an option.</b> Rescale each class's CoV per iteration by
+<code>&#8730;((n&#8722;1)/&#967;&#178;<sub>n&#8722;1</sub>)</code>, capped. This is the statistically correct answer to a three-point
+estimate and it widens the tail precisely where the data is thin.</li>
+<li><b>Risk on case reserves and SIBNR.</b> A separate CoV for the 52% of the book that is currently
+certain, correlated with its class.</li>
+<li><b>Per-class distribution family.</b> One global lognormal for both energy and life is hard to justify. Note the
+direction of travel, though: with the mean and &#963; held fixed, a heavier tail <i>lowers</i> the median and therefore
+<i>raises</i> the booked percentile. A large-loss overlay for energy is about tail realism at the 99.5th, not about
+moving the headline down.</li>
+</ol>
+
+<p class="foot">Diagnostics reproduced independently of the tool in Python and cross-checked against it
+(portfolio percentile 87.2 against 87.5; per-class agreement within Monte Carlo noise). 200,000 iterations,
+cap removed so the simulation is centred on the best estimate. Solvency&nbsp;II figures from Commission Delegated
+Regulation (EU) 2015/35, Annexes II and IV. Reserve figures gross of retrocession.</p>
+
+</div></body></html>
